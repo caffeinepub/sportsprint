@@ -1,0 +1,149 @@
+import { Button } from "@/components/ui/button";
+import { Link } from "@tanstack/react-router";
+import { Menu, ShoppingCart, X, Zap } from "lucide-react";
+import { useState } from "react";
+import { useInternetIdentity } from "../hooks/useInternetIdentity";
+
+export default function Header() {
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const { login, clear, loginStatus } = useInternetIdentity();
+  const isLoggedIn = loginStatus === "success";
+  const isLoggingIn = loginStatus === "logging-in";
+
+  const navLinks = [
+    { to: "/", label: "HOME", exact: true },
+    { to: "/clubs", label: "CLUB LOCKER ROOMS", exact: false },
+    { to: "/stock", label: "STOCK SHOP", exact: false },
+    { to: "/admin", label: "ADMIN", exact: false },
+  ];
+
+  return (
+    <header className="bg-white border-b border-border sticky top-0 z-50 shadow-xs">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          {/* Logo */}
+          <Link
+            to="/"
+            className="flex items-center gap-2 group"
+            data-ocid="nav.link"
+          >
+            <div className="w-8 h-8 bg-primary rounded flex items-center justify-center shadow-sm">
+              <Zap className="w-4 h-4 text-white" fill="white" />
+            </div>
+            <span className="font-heading font-bold text-lg tracking-tight text-foreground">
+              Sports<span className="text-primary">Print</span>
+            </span>
+          </Link>
+
+          {/* Desktop nav */}
+          <nav className="hidden md:flex items-center gap-8">
+            {navLinks.map((link) => (
+              <Link
+                key={link.to}
+                to={link.to}
+                className="text-xs font-bold tracking-widest text-muted-foreground hover:text-primary transition-colors duration-200"
+                activeProps={{
+                  className: "text-xs font-bold tracking-widest text-primary",
+                }}
+                activeOptions={{ exact: link.exact }}
+                data-ocid="nav.link"
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+
+          {/* Right actions */}
+          <div className="flex items-center gap-2">
+            {isLoggedIn ? (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => clear()}
+                className="text-xs uppercase tracking-widest hidden sm:flex"
+                data-ocid="nav.button"
+              >
+                Log Out
+              </Button>
+            ) : (
+              <Button
+                size="sm"
+                onClick={() => login()}
+                disabled={isLoggingIn}
+                className="text-xs uppercase tracking-widest hidden sm:flex"
+                data-ocid="nav.button"
+              >
+                {isLoggingIn ? "Logging in..." : "Login"}
+              </Button>
+            )}
+            <button
+              type="button"
+              className="p-2 text-muted-foreground hover:text-primary transition-colors"
+              aria-label="Cart"
+              data-ocid="nav.button"
+            >
+              <ShoppingCart className="w-5 h-5" />
+            </button>
+            <button
+              type="button"
+              className="md:hidden p-2 text-foreground"
+              onClick={() => setMobileOpen(!mobileOpen)}
+              aria-label="Menu"
+            >
+              {mobileOpen ? (
+                <X className="w-5 h-5" />
+              ) : (
+                <Menu className="w-5 h-5" />
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile menu */}
+      {mobileOpen && (
+        <nav className="md:hidden bg-white border-t border-border">
+          {navLinks.map((link) => (
+            <Link
+              key={link.to}
+              to={link.to}
+              className="block px-6 py-3 text-xs font-bold tracking-widest uppercase text-muted-foreground hover:text-primary hover:bg-muted transition-colors"
+              onClick={() => setMobileOpen(false)}
+              data-ocid="nav.link"
+            >
+              {link.label}
+            </Link>
+          ))}
+          <div className="px-4 py-3 border-t border-border">
+            {isLoggedIn ? (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  clear();
+                  setMobileOpen(false);
+                }}
+                className="w-full text-xs uppercase tracking-widest"
+                data-ocid="nav.button"
+              >
+                Log Out
+              </Button>
+            ) : (
+              <Button
+                size="sm"
+                onClick={() => {
+                  login();
+                  setMobileOpen(false);
+                }}
+                className="w-full text-xs uppercase tracking-widest"
+                data-ocid="nav.button"
+              >
+                Login
+              </Button>
+            )}
+          </div>
+        </nav>
+      )}
+    </header>
+  );
+}
