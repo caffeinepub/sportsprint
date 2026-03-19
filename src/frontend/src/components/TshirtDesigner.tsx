@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
-import { Trash2, Upload } from "lucide-react";
+import { Save, Trash2, Upload } from "lucide-react";
 import { useCallback, useRef, useState } from "react";
 
 const SHIRT_COLORS = [
@@ -16,6 +16,44 @@ const GARMENT_TYPES = [
   { label: "Hoodie", value: "hoodie" },
   { label: "Shorts", value: "shorts" },
 ];
+
+// Explicit static paths — dynamic template strings get pruned by the build scanner
+const GARMENT_IMAGES: Record<string, string> = {
+  "tshirt-blue-front":
+    "/assets/generated/tshirt-blue-front-transparent.dim_600x600.png",
+  "tshirt-blue-back":
+    "/assets/generated/tshirt-blue-back-transparent.dim_600x600.png",
+  "tshirt-red-front":
+    "/assets/generated/tshirt-red-front-transparent.dim_600x600.png",
+  "tshirt-red-back":
+    "/assets/generated/tshirt-red-back-transparent.dim_600x600.png",
+  "tshirt-yellow-front":
+    "/assets/generated/tshirt-yellow-front-transparent.dim_600x600.png",
+  "tshirt-yellow-back":
+    "/assets/generated/tshirt-yellow-back-transparent.dim_600x600.png",
+  "tshirt-white-front":
+    "/assets/generated/tshirt-white-front-transparent.dim_600x600.png",
+  "tshirt-white-back":
+    "/assets/generated/tshirt-white-back-transparent.dim_600x600.png",
+  "hoodie-blue-front": "/assets/generated/hoodie-blue-front.dim_600x600.png",
+  "hoodie-blue-back": "/assets/generated/hoodie-blue-back.dim_600x600.png",
+  "hoodie-red-front": "/assets/generated/hoodie-red-front.dim_600x600.png",
+  "hoodie-red-back": "/assets/generated/hoodie-red-back.dim_600x600.png",
+  "hoodie-yellow-front":
+    "/assets/generated/hoodie-yellow-front.dim_600x600.png",
+  "hoodie-yellow-back": "/assets/generated/hoodie-yellow-back.dim_600x600.png",
+  "hoodie-white-front": "/assets/generated/hoodie-white-front.dim_600x600.png",
+  "hoodie-white-back": "/assets/generated/hoodie-white-back.dim_600x600.png",
+  "shorts-blue-front": "/assets/generated/shorts-blue-front.dim_600x600.png",
+  "shorts-blue-back": "/assets/generated/shorts-blue-back.dim_600x600.png",
+  "shorts-red-front": "/assets/generated/shorts-red-front.dim_600x600.png",
+  "shorts-red-back": "/assets/generated/shorts-red-back.dim_600x600.png",
+  "shorts-yellow-front":
+    "/assets/generated/shorts-yellow-front.dim_600x600.png",
+  "shorts-yellow-back": "/assets/generated/shorts-yellow-back.dim_600x600.png",
+  "shorts-white-front": "/assets/generated/shorts-white-front.dim_600x600.png",
+  "shorts-white-back": "/assets/generated/shorts-white-back.dim_600x600.png",
+};
 
 // Print area per garment type as percentage of container
 const PRINT_AREAS: Record<
@@ -50,22 +88,14 @@ export function TshirtDesigner() {
   const [artworks, setArtworks] = useState<ArtworkItem[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [dragging, setDragging] = useState<DragState>(null);
+  const [savedMessage, setSavedMessage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
 
   const selectedArtwork = artworks.find((a) => a.id === selectedId) ?? null;
 
-  // Map garment type to image prefix
-  const imgPrefix =
-    garment === "tshirt"
-      ? "tshirt"
-      : garment === "hoodie"
-        ? "hoodie"
-        : "shorts";
-  const imgSrc =
-    garment === "tshirt"
-      ? `/assets/generated/tshirt-${tshirtColor}-${view}-transparent.dim_600x600.png`
-      : `/assets/generated/${imgPrefix}-${tshirtColor}-${view}.dim_600x600.png`;
+  const imgKey = `${garment}-${tshirtColor}-${view}`;
+  const imgSrc = GARMENT_IMAGES[imgKey] ?? "";
 
   const PRINT_AREA = PRINT_AREAS[garment];
 
@@ -181,6 +211,18 @@ export function TshirtDesigner() {
     setArtworks((prev) => prev.map((a) => (a.id === id ? { ...a, scale } : a)));
   };
 
+  const handleSaveDesign = () => {
+    const design = {
+      garment,
+      color: tshirtColor,
+      artworks: artworks.map((a) => ({ x: a.x, y: a.y, scale: a.scale })),
+      savedAt: new Date().toISOString(),
+    };
+    localStorage.setItem("sportsPrintSavedDesign", JSON.stringify(design));
+    setSavedMessage("Design saved!");
+    setTimeout(() => setSavedMessage(null), 3000);
+  };
+
   const artworkSize = 80;
 
   return (
@@ -197,7 +239,7 @@ export function TshirtDesigner() {
       <CardContent>
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Canvas */}
-          <div className="flex-shrink-0 flex flex-col items-center gap-3">
+          <div className="flex-shrink-0 flex flex-col items-center gap-2">
             <div
               ref={canvasRef}
               className="relative select-none"
@@ -269,6 +311,9 @@ export function TshirtDesigner() {
                 })}
               </div>
             </div>
+            <p className="text-xs text-muted-foreground italic">
+              For illustration purposes only — not actual product
+            </p>
             <p className="text-xs text-muted-foreground">
               Drag artwork to reposition
             </p>
@@ -439,7 +484,7 @@ export function TshirtDesigner() {
                     Scale
                   </p>
                   <span className="text-xs text-muted-foreground font-mono">
-                    {selectedArtwork.scale.toFixed(1)}×
+                    {selectedArtwork.scale.toFixed(1)}x
                   </span>
                 </div>
                 <Slider
@@ -458,6 +503,23 @@ export function TshirtDesigner() {
                 No artwork uploaded yet. Upload an image to start designing.
               </p>
             )}
+
+            {/* Save Design button */}
+            <div className="flex items-center gap-3 pt-2">
+              <Button
+                onClick={handleSaveDesign}
+                className="flex items-center gap-2"
+                data-ocid="tshirt_designer.save_button"
+              >
+                <Save className="w-4 h-4" />
+                Save Design
+              </Button>
+              {savedMessage && (
+                <span className="text-sm text-green-600 font-medium">
+                  {savedMessage}
+                </span>
+              )}
+            </div>
           </div>
         </div>
       </CardContent>
