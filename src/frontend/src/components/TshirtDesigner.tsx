@@ -28,7 +28,6 @@ type DragState = {
 } | null;
 
 // The printable area of the shirt as a percentage of the container
-// (left, top, width, height) as fraction of 600x600 image
 const PRINT_AREA = { left: 0.22, top: 0.2, width: 0.56, height: 0.6 };
 
 export function TshirtDesigner() {
@@ -42,14 +41,7 @@ export function TshirtDesigner() {
 
   const selectedArtwork = artworks.find((a) => a.id === selectedId) ?? null;
 
-  // Image path based on color (front only for colored; back uses white + tint)
-  const imgSrc =
-    view === "front"
-      ? `/assets/generated/tshirt-${tshirtColor}-front-transparent.dim_600x600.png`
-      : "/assets/generated/tshirt-white-back-transparent.dim_600x600.png";
-
-  const colorHex =
-    SHIRT_COLORS.find((c) => c.value === tshirtColor)?.hex ?? "#1E6BFF";
+  const imgSrc = `/assets/generated/tshirt-${tshirtColor}-${view}-transparent.dim_600x600.png`;
 
   const handleFilesSelected = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -59,7 +51,6 @@ export function TshirtDesigner() {
         reader.onload = (ev) => {
           const dataUrl = ev.target?.result as string;
           const id = Math.random().toString(36).slice(2);
-          // Default: centred in print area
           setArtworks((prev) => [
             ...prev,
             { id, dataUrl, x: 38, y: 28, scale: 1 },
@@ -112,12 +103,10 @@ export function TshirtDesigner() {
       if (!dragging) return;
       const rect = canvasRef.current?.getBoundingClientRect();
       if (!rect) return;
-      // Print area dimensions in px
       const paW = PRINT_AREA.width * rect.width;
       const paH = PRINT_AREA.height * rect.height;
       const dx = e.clientX - dragging.startX;
       const dy = e.clientY - dragging.startY;
-      // Convert to percentage within print area
       const dxPct = (dx / paW) * 100;
       const dyPct = (dy / paH) * 100;
       const newX = Math.max(0, Math.min(80, dragging.origX + dxPct));
@@ -166,7 +155,7 @@ export function TshirtDesigner() {
     setArtworks((prev) => prev.map((a) => (a.id === id ? { ...a, scale } : a)));
   };
 
-  const artworkSize = 80; // base size in px
+  const artworkSize = 80;
 
   return (
     <Card data-ocid="tshirt_designer.card">
@@ -206,17 +195,6 @@ export function TshirtDesigner() {
                 className="absolute inset-0 w-full h-full object-contain pointer-events-none"
                 draggable={false}
               />
-
-              {/* Color tint overlay for back view (white base image + color multiply) */}
-              {view === "back" && tshirtColor !== "white" && (
-                <div
-                  className="absolute inset-0 pointer-events-none"
-                  style={{
-                    backgroundColor: colorHex,
-                    mixBlendMode: "multiply",
-                  }}
-                />
-              )}
 
               {/* Print area — artworks live here */}
               <div
