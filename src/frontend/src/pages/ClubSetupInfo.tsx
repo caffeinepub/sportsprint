@@ -20,6 +20,7 @@ import {
 import { motion } from "motion/react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { TshirtDesigner } from "../components/TshirtDesigner";
 
 const steps = [
   {
@@ -179,15 +180,10 @@ export default function ClubSetupInfo() {
     clubDescription: "",
   });
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
-  const [artworkPreview, setArtworkPreview] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   function handleLogoFile(file: File) {
     setLogoPreview(URL.createObjectURL(file));
-  }
-
-  function handleArtworkFile(file: File) {
-    setArtworkPreview(URL.createObjectURL(file));
   }
 
   function validate() {
@@ -209,7 +205,6 @@ export default function ClubSetupInfo() {
     toast.success("Thanks! We'll be in touch within 24 hours.");
     setForm({ fullName: "", address: "", clubName: "", clubDescription: "" });
     setLogoPreview(null);
-    setArtworkPreview(null);
     setErrors({});
   }
 
@@ -280,17 +275,18 @@ export default function ClubSetupInfo() {
               Tell Us About Your Club
             </h2>
             <p className="text-muted-foreground mb-8 max-w-xl">
-              Fill in the form below and upload your artwork. We'll prepare a
-              bespoke quote and design proof within 48 hours.
+              Fill in the form below and design your kit using our T-Shirt
+              Designer. We'll prepare a bespoke quote and design proof within 48
+              hours.
             </p>
 
-            <form
-              onSubmit={handleSubmit}
-              data-ocid="club_setup.modal"
-              noValidate
-            >
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Left: Form Fields */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Left: Form Fields */}
+              <form
+                onSubmit={handleSubmit}
+                data-ocid="club_setup.modal"
+                noValidate
+              >
                 <Card className="shadow-card">
                   <CardHeader className="pb-4">
                     <CardTitle className="text-base uppercase tracking-wide">
@@ -406,14 +402,6 @@ export default function ClubSetupInfo() {
                       ocid="club_setup.upload_button"
                     />
 
-                    {/* Artwork Upload */}
-                    <DropZone
-                      label="Artwork / Kit Design"
-                      preview={null}
-                      onFile={handleArtworkFile}
-                      ocid="club_setup.dropzone"
-                    />
-
                     <Button
                       type="submit"
                       className="w-full bg-primary text-white font-bold hover:bg-primary/90 mt-2"
@@ -424,110 +412,48 @@ export default function ClubSetupInfo() {
                     </Button>
                   </CardContent>
                 </Card>
+              </form>
 
-                {/* Right: T-Shirt Mockup Preview */}
-                <div className="flex flex-col gap-4">
-                  <Card className="shadow-card flex-1">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-base uppercase tracking-wide flex items-center gap-2">
-                        <Shirt className="w-4 h-4 text-primary" />
-                        Artwork Preview
-                      </CardTitle>
-                      <p className="text-xs text-muted-foreground">
-                        Upload your artwork on the left to see how it looks on a
-                        garment.
-                      </p>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="relative w-full max-w-xs mx-auto select-none">
+              {/* Right: T-Shirt Designer + Logo Preview */}
+              <div className="flex flex-col gap-4">
+                <TshirtDesigner />
+
+                {/* Logo Preview Card */}
+                {logoPreview && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <Card className="shadow-card">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-base uppercase tracking-wide">
+                          Club Logo
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
                         <img
-                          src="/assets/generated/tshirt-mockup-base.dim_600x600.png"
-                          alt="T-shirt mockup"
-                          className="w-full h-auto"
+                          src={logoPreview}
+                          alt="Club logo preview"
+                          className="mx-auto max-h-24 object-contain rounded"
                         />
-                        {artworkPreview ? (
-                          <motion.img
-                            key={artworkPreview}
-                            initial={{ opacity: 0, scale: 0.85 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ duration: 0.3 }}
-                            src={artworkPreview}
-                            alt="Artwork overlay"
-                            className="absolute object-contain"
-                            style={{
-                              top: "22%",
-                              left: "50%",
-                              transform: "translateX(-50%)",
-                              width: "40%",
-                              filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.3))",
-                            }}
-                          />
-                        ) : (
-                          <div className="absolute inset-0 flex items-start justify-center pt-[28%] pointer-events-none">
-                            <div className="text-center px-4">
-                              <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 mb-2">
-                                <Upload className="w-5 h-5 text-primary" />
-                              </div>
-                              <p className="text-xs font-semibold text-foreground/60 leading-snug">
-                                Your artwork
-                                <br />
-                                will appear here
-                              </p>
-                            </div>
-                          </div>
-                        )}
-                      </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                )}
 
-                      {artworkPreview && (
-                        <div className="mt-4 text-center">
-                          <Badge
-                            variant="outline"
-                            className="text-xs text-primary border-primary/30"
-                          >
-                            ✓ Artwork applied — looking great!
-                          </Badge>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-
-                  {/* Logo Preview Card */}
-                  {logoPreview && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 12 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <Card className="shadow-card">
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-base uppercase tracking-wide">
-                            Club Logo
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <img
-                            src={logoPreview}
-                            alt="Club logo preview"
-                            className="mx-auto max-h-24 object-contain rounded"
-                          />
-                        </CardContent>
-                      </Card>
-                    </motion.div>
-                  )}
-
-                  {/* Tip */}
-                  <Card className="bg-primary/5 border-primary/20">
-                    <CardContent className="pt-4 pb-4">
-                      <p className="text-xs text-muted-foreground leading-relaxed">
-                        <span className="font-bold text-primary">Tip:</span>{" "}
-                        Upload a PNG with a transparent background for the
-                        cleanest result on garments. SVG files also work great.
-                      </p>
-                    </CardContent>
-                  </Card>
-                </div>
+                {/* Tip */}
+                <Card className="bg-primary/5 border-primary/20">
+                  <CardContent className="pt-4 pb-4">
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      <span className="font-bold text-primary">Tip:</span>{" "}
+                      Upload a PNG with a transparent background for the
+                      cleanest result on garments. SVG files also work great.
+                    </p>
+                  </CardContent>
+                </Card>
               </div>
-            </form>
+            </div>
           </motion.div>
         </div>
       </section>
@@ -631,7 +557,11 @@ export default function ClubSetupInfo() {
                   </ul>
                   <a href="#enquiry-form" className="block pt-2">
                     <Button
-                      className={`w-full ${tier.highlight ? "bg-primary text-white hover:bg-primary/90" : ""}`}
+                      className={`w-full ${
+                        tier.highlight
+                          ? "bg-primary text-white hover:bg-primary/90"
+                          : ""
+                      }`}
                       variant={tier.highlight ? "default" : "outline"}
                       data-ocid="club_setup.primary_button"
                     >
