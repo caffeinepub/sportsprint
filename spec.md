@@ -1,29 +1,31 @@
 # SportsPrint
 
 ## Current State
-New project. No existing application files.
+The Club Setup page (ClubSetup.tsx) has branding controls, a club preview card, and a product management table. A previous version had a basic t-shirt mockup preview for artwork uploads, but the current file does not include an artwork/t-shirt designer section.
 
 ## Requested Changes (Diff)
 
 ### Add
-- Home/landing page with hero section, services overview, featured clubs, and featured products
-- Club Locker Room pages: each club has its own branded page showing ~20 products in their club colors/branding, with prices, sizes, and colour options
-- Stock Shop page: general public stock catalogue with all available products, filterable by category
-- Product detail view with size/colour selector, price, and add-to-cart
-- Admin area: ability to manage clubs and their product catalogues (add/edit/remove clubs and products)
-- Backend: data model for clubs (name, logo, branding colours, description), products (name, description, price, sizes, colours, images, category, club association), and general stock products
+- A `TshirtDesigner` section on the Club Setup page below the branding card
+- 4 t-shirt colour swatches: Blue (#1E6BFF), Red (#E63946), Yellow (#FFD600), White (#FFFFFF)
+- Front / Back toggle to switch between front and back t-shirt views
+- Multiple artwork file uploads (each stored as a data URL in local state)
+- Each uploaded artwork is displayed on the t-shirt canvas and can be dragged to any position
+- Artwork items listed in a sidebar with remove buttons
+- T-shirt rendered using an SVG path clipped to a shirt shape, filled with the chosen colour
 
 ### Modify
-- N/A (new project)
+- ClubSetup.tsx: add the new TshirtDesigner card section
 
 ### Remove
-- N/A (new project)
+- Nothing removed
 
 ## Implementation Plan
-1. Backend: Define data types for Club and Product. Implement CRUD operations for clubs and products. Support filtering products by club or by general stock.
-2. Frontend: Landing page with hero, services section (Club Locker Rooms + Custom Printing cards), featured clubs band, featured products grid
-3. Frontend: Club Locker Room listing page (search/browse clubs)
-4. Frontend: Individual Club Locker Room page showing club branding + products
-5. Frontend: Stock Shop page with full product catalogue
-6. Frontend: Admin pages for managing clubs and products (protected by authorization)
-7. Wire authorization for admin routes
+1. Create a `TshirtDesigner` React component inside ClubSetup.tsx
+2. State: `tshirtColor`, `view` (front|back), `artworks[]` (id, dataUrl, x, y, scale)
+3. SVG t-shirt outline as a clip path; fill rect coloured with chosen colour
+4. Each artwork rendered as a `<image>` element inside the SVG, draggable via mouse/touch events
+5. Colour swatch buttons (4 options)
+6. Front/Back toggle buttons
+7. File input for adding artworks; display thumbnail list with delete buttons
+8. Drag logic: onMouseDown sets active artwork id + offset, onMouseMove updates x/y, onMouseUp clears

@@ -19,7 +19,8 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Pencil, Plus, Shield, Trash2 } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { Loader2, Pencil, Plus, Settings, Shield, Trash2 } from "lucide-react";
 import { motion } from "motion/react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -728,6 +729,20 @@ export default function Admin() {
                           </TableCell>
                           <TableCell className="text-right">
                             <div className="flex gap-2 justify-end">
+                              <Link
+                                to="/admin/clubs/$id"
+                                params={{ id: club.id.toString() }}
+                                data-ocid={`admin.club.link.${i + 1}`}
+                              >
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="text-xs font-bold"
+                                >
+                                  <Settings className="w-3.5 h-3.5 mr-1" />
+                                  Setup
+                                </Button>
+                              </Link>
                               <Dialog
                                 open={
                                   clubDialog.open &&

@@ -9,10 +9,16 @@ import {
 import Footer from "./components/Footer";
 import Header from "./components/Header";
 import Admin from "./pages/Admin";
+import BrandingGuide from "./pages/BrandingGuide";
 import ClubDetail from "./pages/ClubDetail";
+import ClubSetup from "./pages/ClubSetup";
+import ClubSetupInfo from "./pages/ClubSetupInfo";
 import Clubs from "./pages/Clubs";
+import DeliveryInfo from "./pages/DeliveryInfo";
 import Home from "./pages/Home";
 import ProductDetail from "./pages/ProductDetail";
+import ReturnsPolicy from "./pages/ReturnsPolicy";
+import SizeGuide from "./pages/SizeGuide";
 import StockShop from "./pages/StockShop";
 
 function RootLayout() {
@@ -66,6 +72,42 @@ const adminRoute = createRoute({
   component: Admin,
 });
 
+const clubSetupRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/admin/clubs/$id",
+  component: ClubSetup,
+});
+
+const sizeGuideRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/size-guide",
+  component: SizeGuide,
+});
+
+const deliveryRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/delivery",
+  component: DeliveryInfo,
+});
+
+const returnsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/returns",
+  component: ReturnsPolicy,
+});
+
+const brandingRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/branding",
+  component: BrandingGuide,
+});
+
+const clubSetupInfoRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/club-setup",
+  component: ClubSetupInfo,
+});
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   clubsRoute,
@@ -73,6 +115,12 @@ const routeTree = rootRoute.addChildren([
   stockRoute,
   productRoute,
   adminRoute,
+  clubSetupRoute,
+  sizeGuideRoute,
+  deliveryRoute,
+  returnsRoute,
+  brandingRoute,
+  clubSetupInfoRoute,
 ]);
 
 const router = createRouter({ routeTree });

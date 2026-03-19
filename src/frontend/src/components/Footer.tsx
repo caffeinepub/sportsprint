@@ -95,19 +95,49 @@ export default function Footer() {
             </h4>
             <ul className="space-y-3 text-sm text-white/60">
               <li>
-                <span className="cursor-default">Set Up Your Club</span>
+                <Link
+                  to="/club-setup"
+                  className="hover:text-primary transition-colors"
+                  data-ocid="footer.link"
+                >
+                  Set Up Your Club
+                </Link>
               </li>
               <li>
-                <span className="cursor-default">Branding Guide</span>
+                <Link
+                  to="/branding"
+                  className="hover:text-primary transition-colors"
+                  data-ocid="footer.link"
+                >
+                  Branding Guide
+                </Link>
               </li>
               <li>
-                <span className="cursor-default">Size Guide</span>
+                <Link
+                  to="/size-guide"
+                  className="hover:text-primary transition-colors"
+                  data-ocid="footer.link"
+                >
+                  Size Guide
+                </Link>
               </li>
               <li>
-                <span className="cursor-default">Delivery Info</span>
+                <Link
+                  to="/delivery"
+                  className="hover:text-primary transition-colors"
+                  data-ocid="footer.link"
+                >
+                  Delivery Info
+                </Link>
               </li>
               <li>
-                <span className="cursor-default">Returns Policy</span>
+                <Link
+                  to="/returns"
+                  className="hover:text-primary transition-colors"
+                  data-ocid="footer.link"
+                >
+                  Returns Policy
+                </Link>
               </li>
             </ul>
           </div>
