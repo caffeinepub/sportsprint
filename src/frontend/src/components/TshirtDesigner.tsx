@@ -11,6 +11,22 @@ const SHIRT_COLORS = [
   { label: "White", value: "white", hex: "#FFFFFF" },
 ];
 
+const GARMENT_TYPES = [
+  { label: "T-Shirt", value: "tshirt" },
+  { label: "Hoodie", value: "hoodie" },
+  { label: "Shorts", value: "shorts" },
+];
+
+// Print area per garment type as percentage of container
+const PRINT_AREAS: Record<
+  string,
+  { left: number; top: number; width: number; height: number }
+> = {
+  tshirt: { left: 0.22, top: 0.2, width: 0.56, height: 0.6 },
+  hoodie: { left: 0.25, top: 0.22, width: 0.5, height: 0.5 },
+  shorts: { left: 0.25, top: 0.15, width: 0.5, height: 0.55 },
+};
+
 type ArtworkItem = {
   id: string;
   dataUrl: string;
@@ -27,10 +43,8 @@ type DragState = {
   origY: number;
 } | null;
 
-// The printable area of the shirt as a percentage of the container
-const PRINT_AREA = { left: 0.22, top: 0.2, width: 0.56, height: 0.6 };
-
 export function TshirtDesigner() {
+  const [garment, setGarment] = useState("tshirt");
   const [tshirtColor, setTshirtColor] = useState("blue");
   const [view, setView] = useState<"front" | "back">("front");
   const [artworks, setArtworks] = useState<ArtworkItem[]>([]);
@@ -41,7 +55,19 @@ export function TshirtDesigner() {
 
   const selectedArtwork = artworks.find((a) => a.id === selectedId) ?? null;
 
-  const imgSrc = `/assets/generated/tshirt-${tshirtColor}-${view}-transparent.dim_600x600.png`;
+  // Map garment type to image prefix
+  const imgPrefix =
+    garment === "tshirt"
+      ? "tshirt"
+      : garment === "hoodie"
+        ? "hoodie"
+        : "shorts";
+  const imgSrc =
+    garment === "tshirt"
+      ? `/assets/generated/tshirt-${tshirtColor}-${view}-transparent.dim_600x600.png`
+      : `/assets/generated/${imgPrefix}-${tshirtColor}-${view}.dim_600x600.png`;
+
+  const PRINT_AREA = PRINT_AREAS[garment];
 
   const handleFilesSelected = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -117,7 +143,7 @@ export function TshirtDesigner() {
         ),
       );
     },
-    [dragging],
+    [dragging, PRINT_AREA],
   );
 
   const handleCanvasTouchMove = useCallback(
@@ -141,7 +167,7 @@ export function TshirtDesigner() {
         ),
       );
     },
-    [dragging],
+    [dragging, PRINT_AREA],
   );
 
   const stopDragging = useCallback(() => setDragging(null), []);
@@ -161,11 +187,11 @@ export function TshirtDesigner() {
     <Card data-ocid="tshirt_designer.card">
       <CardHeader>
         <CardTitle className="font-heading font-bold uppercase tracking-tight text-base">
-          T-Shirt Designer
+          Garment Designer
         </CardTitle>
         <p className="text-sm text-muted-foreground">
-          Upload artwork, pick a colour, then drag it into position on the
-          shirt.
+          Pick a garment, choose a colour, upload artwork and drag it into
+          position.
         </p>
       </CardHeader>
       <CardContent>
@@ -188,10 +214,10 @@ export function TshirtDesigner() {
               onTouchEnd={stopDragging}
               data-ocid="tshirt_designer.canvas_target"
             >
-              {/* T-shirt photo */}
+              {/* Garment photo */}
               <img
                 src={imgSrc}
-                alt="T-shirt"
+                alt={garment}
                 className="absolute inset-0 w-full h-full object-contain pointer-events-none"
                 draggable={false}
               />
@@ -250,10 +276,31 @@ export function TshirtDesigner() {
 
           {/* Controls */}
           <div className="flex-1 space-y-6">
+            {/* Garment type */}
+            <div>
+              <p className="text-xs uppercase tracking-widest font-bold mb-3">
+                Garment
+              </p>
+              <div className="flex gap-2 flex-wrap">
+                {GARMENT_TYPES.map((g) => (
+                  <Button
+                    key={g.value}
+                    size="sm"
+                    variant={garment === g.value ? "default" : "outline"}
+                    onClick={() => setGarment(g.value)}
+                    className="text-xs uppercase tracking-widest font-bold"
+                    data-ocid="tshirt_designer.toggle"
+                  >
+                    {g.label}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
             {/* Colour picker */}
             <div>
               <p className="text-xs uppercase tracking-widest font-bold mb-3">
-                T-Shirt Colour
+                Colour
               </p>
               <div className="flex gap-3">
                 {SHIRT_COLORS.map((c) => (
