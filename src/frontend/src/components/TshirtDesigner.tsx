@@ -5,14 +5,11 @@ import { Trash2, Upload } from "lucide-react";
 import { useCallback, useRef, useState } from "react";
 
 const SHIRT_COLORS = [
-  { label: "Blue", value: "#1E6BFF" },
-  { label: "Red", value: "#E63946" },
-  { label: "Yellow", value: "#FFD600" },
-  { label: "White", value: "#FFFFFF" },
+  { label: "Blue", value: "blue", hex: "#1E6BFF" },
+  { label: "Red", value: "red", hex: "#E63946" },
+  { label: "Yellow", value: "yellow", hex: "#FFD600" },
+  { label: "White", value: "white", hex: "#FFFFFF" },
 ];
-
-const SHIRT_PATH =
-  "M 60,40 L 30,30 L 0,70 L 40,85 L 40,320 L 260,320 L 260,85 L 300,70 L 270,30 L 240,40 Q 220,10 180,5 Q 150,0 120,5 Q 80,10 60,40 Z";
 
 type ArtworkItem = {
   id: string;
@@ -30,16 +27,29 @@ type DragState = {
   origY: number;
 } | null;
 
+// The printable area of the shirt as a percentage of the container
+// (left, top, width, height) as fraction of 600x600 image
+const PRINT_AREA = { left: 0.22, top: 0.2, width: 0.56, height: 0.6 };
+
 export function TshirtDesigner() {
-  const [tshirtColor, setTshirtColor] = useState("#1E6BFF");
+  const [tshirtColor, setTshirtColor] = useState("blue");
   const [view, setView] = useState<"front" | "back">("front");
   const [artworks, setArtworks] = useState<ArtworkItem[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [dragging, setDragging] = useState<DragState>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const svgRef = useRef<SVGSVGElement>(null);
+  const canvasRef = useRef<HTMLDivElement>(null);
 
   const selectedArtwork = artworks.find((a) => a.id === selectedId) ?? null;
+
+  // Image path based on color (front only for colored; back uses white + tint)
+  const imgSrc =
+    view === "front"
+      ? `/assets/generated/tshirt-${tshirtColor}-front-transparent.dim_600x600.png`
+      : "/assets/generated/tshirt-white-back-transparent.dim_600x600.png";
+
+  const colorHex =
+    SHIRT_COLORS.find((c) => c.value === tshirtColor)?.hex ?? "#1E6BFF";
 
   const handleFilesSelected = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -49,9 +59,10 @@ export function TshirtDesigner() {
         reader.onload = (ev) => {
           const dataUrl = ev.target?.result as string;
           const id = Math.random().toString(36).slice(2);
+          // Default: centred in print area
           setArtworks((prev) => [
             ...prev,
-            { id, dataUrl, x: 110, y: 120, scale: 1 },
+            { id, dataUrl, x: 38, y: 28, scale: 1 },
           ]);
           setSelectedId(id);
         };
@@ -67,6 +78,8 @@ export function TshirtDesigner() {
       e.preventDefault();
       e.stopPropagation();
       setSelectedId(art.id);
+      const rect = canvasRef.current?.getBoundingClientRect();
+      if (!rect) return;
       setDragging({
         artworkId: art.id,
         startX: e.clientX,
@@ -94,39 +107,45 @@ export function TshirtDesigner() {
     [],
   );
 
-  const handleSvgMouseMove = useCallback(
+  const handleCanvasMouseMove = useCallback(
     (e: React.MouseEvent) => {
       if (!dragging) return;
-      const art = artworks.find((a) => a.id === dragging.artworkId);
-      if (!art) return;
+      const rect = canvasRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      // Print area dimensions in px
+      const paW = PRINT_AREA.width * rect.width;
+      const paH = PRINT_AREA.height * rect.height;
       const dx = e.clientX - dragging.startX;
       const dy = e.clientY - dragging.startY;
-      const rect = svgRef.current?.getBoundingClientRect();
-      const scaleX = rect ? 300 / rect.width : 1;
-      const scaleY = rect ? 340 / rect.height : 1;
-      const newX = Math.max(0, Math.min(220, dragging.origX + dx * scaleX));
-      const newY = Math.max(0, Math.min(260, dragging.origY + dy * scaleY));
+      // Convert to percentage within print area
+      const dxPct = (dx / paW) * 100;
+      const dyPct = (dy / paH) * 100;
+      const newX = Math.max(0, Math.min(80, dragging.origX + dxPct));
+      const newY = Math.max(0, Math.min(80, dragging.origY + dyPct));
       setArtworks((prev) =>
         prev.map((a) =>
           a.id === dragging.artworkId ? { ...a, x: newX, y: newY } : a,
         ),
       );
     },
-    [dragging, artworks],
+    [dragging],
   );
 
-  const handleSvgTouchMove = useCallback(
+  const handleCanvasTouchMove = useCallback(
     (e: React.TouchEvent) => {
       if (!dragging) return;
       e.preventDefault();
       const touch = e.touches[0];
-      const rect = svgRef.current?.getBoundingClientRect();
-      const scaleX = rect ? 300 / rect.width : 1;
-      const scaleY = rect ? 340 / rect.height : 1;
+      const rect = canvasRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      const paW = PRINT_AREA.width * rect.width;
+      const paH = PRINT_AREA.height * rect.height;
       const dx = touch.clientX - dragging.startX;
       const dy = touch.clientY - dragging.startY;
-      const newX = Math.max(0, Math.min(220, dragging.origX + dx * scaleX));
-      const newY = Math.max(0, Math.min(260, dragging.origY + dy * scaleY));
+      const dxPct = (dx / paW) * 100;
+      const dyPct = (dy / paH) * 100;
+      const newX = Math.max(0, Math.min(80, dragging.origX + dxPct));
+      const newY = Math.max(0, Math.min(80, dragging.origY + dyPct));
       setArtworks((prev) =>
         prev.map((a) =>
           a.id === dragging.artworkId ? { ...a, x: newX, y: newY } : a,
@@ -147,6 +166,8 @@ export function TshirtDesigner() {
     setArtworks((prev) => prev.map((a) => (a.id === id ? { ...a, scale } : a)));
   };
 
+  const artworkSize = 80; // base size in px
+
   return (
     <Card data-ocid="tshirt_designer.card">
       <CardHeader>
@@ -160,101 +181,90 @@ export function TshirtDesigner() {
       </CardHeader>
       <CardContent>
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* SVG Canvas */}
+          {/* Canvas */}
           <div className="flex-shrink-0 flex flex-col items-center gap-3">
-            <svg
-              ref={svgRef}
-              viewBox="0 0 300 340"
-              width="300"
-              height="340"
+            <div
+              ref={canvasRef}
+              className="relative select-none"
               style={{
-                touchAction: "none",
+                width: 300,
+                height: 300,
                 cursor: dragging ? "grabbing" : "default",
+                touchAction: "none",
               }}
-              onMouseMove={handleSvgMouseMove}
+              onMouseMove={handleCanvasMouseMove}
               onMouseUp={stopDragging}
               onMouseLeave={stopDragging}
-              onTouchMove={handleSvgTouchMove}
+              onTouchMove={handleCanvasTouchMove}
               onTouchEnd={stopDragging}
-              aria-label="T-shirt design canvas"
               data-ocid="tshirt_designer.canvas_target"
             >
-              <title>T-shirt design canvas</title>
-              <defs>
-                <clipPath id="tshirt-clip">
-                  <path d={SHIRT_PATH} />
-                </clipPath>
-              </defs>
-
-              {/* Fill */}
-              <rect
-                x="0"
-                y="0"
-                width="300"
-                height="340"
-                fill={tshirtColor}
-                clipPath="url(#tshirt-clip)"
+              {/* T-shirt photo */}
+              <img
+                src={imgSrc}
+                alt="T-shirt"
+                className="absolute inset-0 w-full h-full object-contain pointer-events-none"
+                draggable={false}
               />
 
-              {/* Artworks */}
-              {artworks.map((art) => {
-                const w = 80 * art.scale;
-                const h = 80 * art.scale;
-                const isSelected = art.id === selectedId;
-                return (
-                  <g key={art.id}>
-                    {isSelected && (
-                      <rect
-                        x={art.x - 2}
-                        y={art.y - 2}
-                        width={w + 4}
-                        height={h + 4}
-                        fill="none"
-                        stroke="#6366f1"
-                        strokeWidth="2"
-                        strokeDasharray="6 3"
-                        clipPath="url(#tshirt-clip)"
-                      />
-                    )}
-                    <image
-                      href={art.dataUrl}
-                      x={art.x}
-                      y={art.y}
-                      width={w}
-                      height={h}
-                      clipPath="url(#tshirt-clip)"
-                      style={{ cursor: "grab" }}
+              {/* Color tint overlay for back view (white base image + color multiply) */}
+              {view === "back" && tshirtColor !== "white" && (
+                <div
+                  className="absolute inset-0 pointer-events-none"
+                  style={{
+                    backgroundColor: colorHex,
+                    mixBlendMode: "multiply",
+                  }}
+                />
+              )}
+
+              {/* Print area — artworks live here */}
+              <div
+                className="absolute"
+                style={{
+                  left: `${PRINT_AREA.left * 100}%`,
+                  top: `${PRINT_AREA.top * 100}%`,
+                  width: `${PRINT_AREA.width * 100}%`,
+                  height: `${PRINT_AREA.height * 100}%`,
+                  overflow: "hidden",
+                }}
+              >
+                {artworks.map((art, i) => {
+                  const w = artworkSize * art.scale;
+                  const isSelected = art.id === selectedId;
+                  return (
+                    <div
+                      key={art.id}
+                      style={{
+                        position: "absolute",
+                        left: `${art.x}%`,
+                        top: `${art.y}%`,
+                        width: w,
+                        height: w,
+                        cursor: "grab",
+                        outline: isSelected ? "2px dashed #6366f1" : "none",
+                        outlineOffset: 2,
+                      }}
                       onMouseDown={(e) => handleArtworkMouseDown(e, art)}
                       onTouchStart={(e) => handleArtworkTouchStart(e, art)}
-                    />
-                  </g>
-                );
-              })}
-
-              {/* Shirt outline */}
-              <path
-                d={SHIRT_PATH}
-                fill="none"
-                stroke={tshirtColor === "#FFFFFF" ? "#aaa" : "rgba(0,0,0,0.25)"}
-                strokeWidth="1.5"
-              />
-
-              {/* Back label */}
-              {view === "back" && (
-                <text
-                  x="150"
-                  y="55"
-                  textAnchor="middle"
-                  fontSize="13"
-                  fontWeight="bold"
-                  fill={tshirtColor === "#FFFFFF" ? "#aaa" : "rgba(0,0,0,0.3)"}
-                  fontFamily="sans-serif"
-                  letterSpacing="4"
-                >
-                  BACK
-                </text>
-              )}
-            </svg>
+                      data-ocid={`tshirt_designer.item.${i + 1}`}
+                    >
+                      <img
+                        src={art.dataUrl}
+                        alt={`Artwork ${i + 1}`}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "contain",
+                          pointerEvents: "none",
+                        }}
+                        draggable={false}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
             <p className="text-xs text-muted-foreground">
               Drag artwork to reposition
             </p>
@@ -278,7 +288,7 @@ export function TshirtDesigner() {
                     style={{
                       width: 36,
                       height: 36,
-                      backgroundColor: c.value,
+                      backgroundColor: c.hex,
                       borderColor:
                         tshirtColor === c.value ? "#6366f1" : "#d1d5db",
                       boxShadow:
@@ -288,7 +298,7 @@ export function TshirtDesigner() {
                     }}
                     data-ocid="tshirt_designer.toggle"
                   >
-                    {c.value === "#FFFFFF" && (
+                    {c.value === "white" && (
                       <span className="absolute inset-0 rounded-full border border-gray-300" />
                     )}
                   </button>
@@ -369,14 +379,14 @@ export function TshirtDesigner() {
                           ? "border-primary bg-primary/5"
                           : "border-border hover:border-primary/40"
                       }`}
-                      data-ocid={`tshirt_designer.item.${i + 1}`}
+                      data-ocid={`tshirt_designer.list_item.${i + 1}`}
                     >
                       <img
                         src={art.dataUrl}
                         alt={`Artwork ${i + 1}`}
                         className="w-10 h-10 object-contain rounded border border-border bg-muted"
                       />
-                      <span className="flex-1 text-sm font-medium">
+                      <span className="flex-1 text-sm font-medium text-left">
                         Artwork {i + 1}
                       </span>
                       <button
