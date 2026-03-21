@@ -45,7 +45,7 @@ const steps = [
     num: "04",
     icon: ShoppingBag,
     title: "Locker Room Launch",
-    desc: "Your branded locker room goes live on the SportsPrint site. Members can browse, order, and pay directly. You stay in control.",
+    desc: "Your branded locker room goes live on the Clubkit Co site. Members can browse, order, and pay directly. You stay in control.",
   },
 ];
 
@@ -522,7 +522,7 @@ export default function ClubSetupInfo() {
             Pricing Tiers
           </h2>
           <p className="text-muted-foreground mb-8">
-            All tiers include your branded locker room hosted on SportsPrint. No
+            All tiers include your branded locker room hosted on Clubkit Co. No
             monthly fees.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

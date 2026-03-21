@@ -1,5 +1,4 @@
 import { Link } from "@tanstack/react-router";
-import { Zap } from "lucide-react";
 import { SiFacebook, SiInstagram, SiX } from "react-icons/si";
 
 export default function Footer() {
@@ -13,12 +12,11 @@ export default function Footer() {
           {/* Brand */}
           <div className="md:col-span-1">
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 bg-primary rounded flex items-center justify-center">
-                <Zap className="w-4 h-4 text-white" fill="white" />
-              </div>
-              <span className="font-heading font-bold text-lg">
-                Sports<span className="text-primary">Print</span>
-              </span>
+              <img
+                src="/assets/generated/clubkit-logo-transparent.dim_400x400.png"
+                alt="Clubkit Co"
+                className="h-8 w-auto"
+              />
             </div>
             <p className="text-sm text-white/50 leading-relaxed">
               Premium custom sports printing for clubs, teams, and individuals
@@ -148,7 +146,7 @@ export default function Footer() {
               Contact
             </h4>
             <ul className="space-y-3 text-sm text-white/60">
-              <li>hello@sportsprint.co.uk</li>
+              <li>hello@clubkitco.co.uk</li>
               <li>0800 123 4567</li>
               <li className="text-white/40">Mon–Fri, 9am–5pm</li>
             </ul>
@@ -157,7 +155,7 @@ export default function Footer() {
 
         <div className="border-t border-white/10 mt-12 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-white/30">
-            © {year} SportsPrint. All rights reserved.
+            © {year} Clubkit Co. All rights reserved.
           </p>
           <p className="text-xs text-white/30">
             Built with ❤️ using{" "}

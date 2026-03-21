@@ -538,7 +538,7 @@ function LoginForm({
               Admin Login
             </h1>
             <p className="text-muted-foreground text-sm mt-1">
-              SportsPrint Admin Area
+              Clubkit Co Admin Area
             </p>
           </div>
           <form onSubmit={handleSubmit} className="space-y-4">

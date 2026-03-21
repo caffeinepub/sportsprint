@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "@tanstack/react-router";
-import { Menu, ShoppingCart, X, Zap } from "lucide-react";
+import { Menu, ShoppingCart, X } from "lucide-react";
 import { useState } from "react";
 import { useCart } from "../context/CartContext";
 
@@ -25,12 +25,11 @@ export default function Header() {
             className="flex items-center gap-2 group"
             data-ocid="nav.link"
           >
-            <div className="w-8 h-8 bg-primary rounded flex items-center justify-center shadow-sm">
-              <Zap className="w-4 h-4 text-white" fill="white" />
-            </div>
-            <span className="font-heading font-bold text-lg tracking-tight text-foreground">
-              Sports<span className="text-primary">Print</span>
-            </span>
+            <img
+              src="/assets/generated/clubkit-logo-transparent.dim_400x400.png"
+              alt="Clubkit Co"
+              className="h-10 w-auto"
+            />
           </Link>
 
           {/* Desktop nav */}
