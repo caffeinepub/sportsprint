@@ -20,9 +20,18 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Link } from "@tanstack/react-router";
-import { Loader2, Pencil, Plus, Settings, Shield, Trash2 } from "lucide-react";
+import {
+  Loader2,
+  Pencil,
+  Plus,
+  Settings,
+  Shield,
+  Trash2,
+  Upload,
+  X,
+} from "lucide-react";
 import { motion } from "motion/react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 import type { Club, Product } from "../backend.d.ts";
 import { formatPrice } from "../components/ProductCard";
@@ -61,6 +70,82 @@ const EMPTY_PRODUCT: Product = {
   imageUrl: "",
   isActive: true,
 };
+
+function ImageUpload({
+  value,
+  onChange,
+  label,
+  ocid,
+}: {
+  value: string;
+  onChange: (url: string) => void;
+  label: string;
+  ocid: string;
+}) {
+  const [uploading, setUploading] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      onChange(reader.result as string);
+      setUploading(false);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  return (
+    <div>
+      <Label className="text-xs uppercase tracking-widest font-bold">
+        {label}
+      </Label>
+      <div className="mt-1 flex items-center gap-3">
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          disabled={uploading}
+          className="flex items-center gap-2 px-4 py-2 border-2 border-dashed border-border rounded-lg text-sm text-muted-foreground hover:border-primary hover:text-primary transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          data-ocid={`${ocid}.upload_button`}
+        >
+          {uploading ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <Upload className="w-4 h-4" />
+          )}
+          {uploading ? "Uploading..." : value ? "Change Image" : "Upload Image"}
+        </button>
+        {value && (
+          <div className="flex items-center gap-2">
+            <img
+              src={value}
+              alt="Preview"
+              className="w-12 h-12 rounded object-cover border border-border"
+            />
+            <button
+              type="button"
+              onClick={() => onChange("")}
+              className="text-muted-foreground hover:text-destructive transition-colors"
+              aria-label="Remove image"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+      </div>
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleFile}
+        className="hidden"
+        data-ocid={ocid}
+      />
+    </div>
+  );
+}
 
 function ClubForm({
   initial,
@@ -139,21 +224,12 @@ function ClubForm({
           data-ocid="admin.club.textarea"
         />
       </div>
-      <div>
-        <Label
-          htmlFor="club-logo"
-          className="text-xs uppercase tracking-widest font-bold"
-        >
-          Logo URL
-        </Label>
-        <Input
-          id="club-logo"
-          value={form.logoUrl}
-          onChange={(e) => set("logoUrl", e.target.value)}
-          placeholder="https://..."
-          data-ocid="admin.club.input"
-        />
-      </div>
+      <ImageUpload
+        value={form.logoUrl}
+        onChange={(url) => set("logoUrl", url)}
+        label="Club Logo"
+        ocid="admin.club"
+      />
       <div className="grid grid-cols-2 gap-4">
         <div>
           <Label
@@ -380,21 +456,12 @@ function ProductForm({
           />
         </div>
       </div>
-      <div>
-        <Label
-          htmlFor="prod-img"
-          className="text-xs uppercase tracking-widest font-bold"
-        >
-          Image URL
-        </Label>
-        <Input
-          id="prod-img"
-          value={form.imageUrl}
-          onChange={(e) => setField("imageUrl", e.target.value)}
-          placeholder="https://..."
-          data-ocid="admin.product.input"
-        />
-      </div>
+      <ImageUpload
+        value={form.imageUrl}
+        onChange={(url) => setField("imageUrl", url)}
+        label="Product Image"
+        ocid="admin.product"
+      />
       <div className="flex items-center gap-2">
         <input
           type="checkbox"
@@ -431,7 +498,8 @@ function ProductForm({
 }
 
 export default function Admin() {
-  const { login, loginStatus } = useInternetIdentity();
+  const { login, loginStatus, loginError, clear, identity, isInitializing } =
+    useInternetIdentity();
   const { data: isAdmin, isLoading: adminLoading } = useIsAdmin();
   const { data: clubs, isLoading: clubsLoading } = useAllClubs();
   const { data: products, isLoading: productsLoading } = useGeneralStock();
@@ -455,7 +523,20 @@ export default function Admin() {
     product: EMPTY_PRODUCT,
   });
 
-  const isLoggedIn = loginStatus === "success";
+  const isLoggedIn =
+    loginStatus === "success" || (loginStatus === "idle" && !!identity);
+  const isLoggingIn = loginStatus === "logging-in";
+
+  if (isInitializing) {
+    return (
+      <div
+        className="min-h-screen bg-background flex items-center justify-center"
+        data-ocid="admin.loading_state"
+      >
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   if (!isLoggedIn) {
     return (
@@ -478,11 +559,31 @@ export default function Admin() {
           <Button
             size="lg"
             onClick={() => login()}
+            disabled={isLoggingIn}
             className="bg-primary hover:bg-primary/90 text-white font-bold uppercase tracking-widest text-xs"
             data-ocid="admin.primary_button"
           >
-            Login to Admin
+            {isLoggingIn ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Logging in...
+              </>
+            ) : (
+              "Login to Admin"
+            )}
           </Button>
+          {loginError && (
+            <p
+              className="text-destructive text-sm mt-3"
+              data-ocid="admin.error_state"
+            >
+              {loginError.message}
+            </p>
+          )}
+          <p className="text-xs text-muted-foreground mt-4">
+            Note: Please allow pop-ups for this site when prompted by your
+            browser.
+          </p>
         </motion.div>
       </div>
     );
@@ -508,9 +609,20 @@ export default function Admin() {
           <h1 className="font-heading font-black text-2xl uppercase tracking-tight mb-3">
             Access Denied
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground mb-2">
             You do not have admin privileges.
           </p>
+          <p className="text-sm text-muted-foreground mb-6">
+            If you got here by mistake, make sure you&apos;re using the admin
+            link from your Caffeine dashboard.
+          </p>
+          <Button
+            variant="outline"
+            onClick={() => clear()}
+            data-ocid="admin.secondary_button"
+          >
+            Log out and try again
+          </Button>
         </div>
       </div>
     );
