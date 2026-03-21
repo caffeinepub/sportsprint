@@ -9,6 +9,7 @@ import {
 import Footer from "./components/Footer";
 import Header from "./components/Header";
 import Admin from "./pages/Admin";
+import Basket from "./pages/Basket";
 import BrandingGuide from "./pages/BrandingGuide";
 import ClubDetail from "./pages/ClubDetail";
 import ClubSetup from "./pages/ClubSetup";
@@ -16,6 +17,8 @@ import ClubSetupInfo from "./pages/ClubSetupInfo";
 import Clubs from "./pages/Clubs";
 import DeliveryInfo from "./pages/DeliveryInfo";
 import Home from "./pages/Home";
+import PaymentFailure from "./pages/PaymentFailure";
+import PaymentSuccess from "./pages/PaymentSuccess";
 import ProductDetail from "./pages/ProductDetail";
 import ReturnsPolicy from "./pages/ReturnsPolicy";
 import SizeGuide from "./pages/SizeGuide";
@@ -108,6 +111,24 @@ const clubSetupInfoRoute = createRoute({
   component: ClubSetupInfo,
 });
 
+const basketRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/basket",
+  component: Basket,
+});
+
+const paymentSuccessRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/payment-success",
+  component: PaymentSuccess,
+});
+
+const paymentFailureRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/payment-failure",
+  component: PaymentFailure,
+});
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   clubsRoute,
@@ -121,6 +142,9 @@ const routeTree = rootRoute.addChildren([
   returnsRoute,
   brandingRoute,
   clubSetupInfoRoute,
+  basketRoute,
+  paymentSuccessRoute,
+  paymentFailureRoute,
 ]);
 
 const router = createRouter({ routeTree });

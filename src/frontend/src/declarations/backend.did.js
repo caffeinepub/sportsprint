@@ -46,6 +46,23 @@ export const Product = IDL.Record({
   'colors' : IDL.Text,
 });
 export const UserProfile = IDL.Record({ 'name' : IDL.Text });
+export const StripeConfiguration = IDL.Record({
+  'secretKey' : IDL.Text,
+  'allowedCountries' : IDL.Vec(IDL.Text),
+});
+export const ShoppingItem = IDL.Record({
+  'name' : IDL.Text,
+  'amount' : IDL.Nat,
+  'currency' : IDL.Text,
+  'quantity' : IDL.Nat,
+});
+export const Order = IDL.Record({
+  'id' : IDL.Nat,
+  'itemsJson' : IDL.Text,
+  'totalInPence' : IDL.Nat,
+  'status' : IDL.Text,
+  'stripeSessionId' : IDL.Text,
+});
 
 export const idlService = IDL.Service({
   '_caffeineStorageBlobIsLive' : IDL.Func(
@@ -96,6 +113,14 @@ export const idlService = IDL.Service({
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
   'updateClub' : IDL.Func([Club], [], []),
   'updateProduct' : IDL.Func([Product], [], []),
+  'verifyAdminPassword' : IDL.Func([IDL.Text, IDL.Text], [IDL.Bool], ['query']),
+  'isStripeConfigured' : IDL.Func([], [IDL.Bool], ['query']),
+  'setStripeConfiguration' : IDL.Func([StripeConfiguration], [], []),
+  'createCheckoutSession' : IDL.Func([IDL.Vec(ShoppingItem), IDL.Text, IDL.Text], [IDL.Text], []),
+  'createOrder' : IDL.Func([IDL.Text, IDL.Nat, IDL.Text], [IDL.Nat], []),
+  'updateOrderStatus' : IDL.Func([IDL.Nat, IDL.Text], [], []),
+  'getOrderById' : IDL.Func([IDL.Nat], [IDL.Opt(Order)], ['query']),
+  'getOrderByStripeSession' : IDL.Func([IDL.Text], [IDL.Opt(Order)], ['query']),
 });
 
 export const idlInitArgs = [];
@@ -139,6 +164,23 @@ export const idlFactory = ({ IDL }) => {
     'colors' : IDL.Text,
   });
   const UserProfile = IDL.Record({ 'name' : IDL.Text });
+  const StripeConfiguration = IDL.Record({
+    'secretKey' : IDL.Text,
+    'allowedCountries' : IDL.Vec(IDL.Text),
+  });
+  const ShoppingItem = IDL.Record({
+    'name' : IDL.Text,
+    'amount' : IDL.Nat,
+    'currency' : IDL.Text,
+    'quantity' : IDL.Nat,
+  });
+  const Order = IDL.Record({
+    'id' : IDL.Nat,
+    'itemsJson' : IDL.Text,
+    'totalInPence' : IDL.Nat,
+    'status' : IDL.Text,
+    'stripeSessionId' : IDL.Text,
+  });
   
   return IDL.Service({
     '_caffeineStorageBlobIsLive' : IDL.Func(
@@ -189,6 +231,14 @@ export const idlFactory = ({ IDL }) => {
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
     'updateClub' : IDL.Func([Club], [], []),
     'updateProduct' : IDL.Func([Product], [], []),
+    'verifyAdminPassword' : IDL.Func([IDL.Text, IDL.Text], [IDL.Bool], ['query']),
+    'isStripeConfigured' : IDL.Func([], [IDL.Bool], ['query']),
+    'setStripeConfiguration' : IDL.Func([StripeConfiguration], [], []),
+    'createCheckoutSession' : IDL.Func([IDL.Vec(ShoppingItem), IDL.Text, IDL.Text], [IDL.Text], []),
+    'createOrder' : IDL.Func([IDL.Text, IDL.Nat, IDL.Text], [IDL.Nat], []),
+    'updateOrderStatus' : IDL.Func([IDL.Nat, IDL.Text], [], []),
+    'getOrderById' : IDL.Func([IDL.Nat], [IDL.Opt(Order)], ['query']),
+    'getOrderByStripeSession' : IDL.Func([IDL.Text], [IDL.Opt(Order)], ['query']),
   });
 };
 

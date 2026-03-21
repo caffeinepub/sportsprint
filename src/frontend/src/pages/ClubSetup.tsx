@@ -30,12 +30,11 @@ import { toast } from "sonner";
 import type { Club, Product } from "../backend.d.ts";
 import { formatPrice } from "../components/ProductCard";
 import { TshirtDesigner } from "../components/TshirtDesigner";
-import { useInternetIdentity } from "../hooks/useInternetIdentity";
+import { useAdminAuth } from "../hooks/useAdminAuth";
 import {
   useAllClubs,
   useCreateProduct,
   useDeleteProduct,
-  useIsAdmin,
   useProductsByClub,
   useUpdateClub,
   useUpdateProduct,
@@ -330,8 +329,7 @@ export default function ClubSetup() {
   const { id } = useParams({ strict: false }) as { id: string };
   const clubId = BigInt(id || "0");
 
-  const { login, loginStatus } = useInternetIdentity();
-  const { data: isAdmin, isLoading: adminLoading } = useIsAdmin();
+  const { isAuthenticated } = useAdminAuth();
   const { data: clubs, isLoading: clubsLoading } = useAllClubs();
   const { data: products, isLoading: productsLoading } =
     useProductsByClub(clubId);
@@ -355,7 +353,6 @@ export default function ClubSetup() {
       secondaryColor: "#FFFFFF",
     };
 
-  // Sync form once club loads (only if not yet edited)
   if (club && form === null) {
     setForm(club);
   }
@@ -366,38 +363,36 @@ export default function ClubSetup() {
   const [productFormState, setProductFormState] = useState<{
     open: boolean;
     product: Product;
-  }>({ open: false, product: EMPTY_PRODUCT(clubId) });
+  }>({
+    open: false,
+    product: EMPTY_PRODUCT(clubId),
+  });
 
-  const isLoggedIn = loginStatus === "success";
-
-  if (!isLoggedIn) {
+  if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div
           className="text-center max-w-md mx-auto px-4"
           data-ocid="club_setup.panel"
         >
-          <Shield className="w-12 h-12 text-primary mx-auto mb-4" />
+          <Shield className="w-12 h-12 text-destructive mx-auto mb-4" />
           <h1 className="font-heading font-black text-2xl uppercase tracking-tight mb-3">
-            Club Setup
+            Access Denied
           </h1>
-          <p className="text-muted-foreground mb-8">
-            Please log in to access club setup.
+          <p className="text-muted-foreground mb-6">
+            Please log in via the Admin area first.
           </p>
-          <Button
-            size="lg"
-            onClick={() => login()}
-            className="font-bold uppercase tracking-widest text-xs"
-            data-ocid="club_setup.primary_button"
-          >
-            Login
-          </Button>
+          <Link to="/admin">
+            <Button data-ocid="club_setup.primary_button">
+              Go to Admin Login
+            </Button>
+          </Link>
         </div>
       </div>
     );
   }
 
-  if (adminLoading || clubsLoading) {
+  if (clubsLoading) {
     return (
       <div
         className="max-w-7xl mx-auto px-4 py-20"
@@ -414,25 +409,6 @@ export default function ClubSetup() {
           <div className="col-span-2">
             <Skeleton className="h-64 rounded-xl" />
           </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!isAdmin) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div
-          className="text-center max-w-md mx-auto px-4"
-          data-ocid="club_setup.error_state"
-        >
-          <Shield className="w-12 h-12 text-destructive mx-auto mb-4" />
-          <h1 className="font-heading font-black text-2xl uppercase tracking-tight mb-3">
-            Access Denied
-          </h1>
-          <p className="text-muted-foreground">
-            You do not have admin privileges.
-          </p>
         </div>
       </div>
     );
@@ -497,16 +473,13 @@ export default function ClubSetup() {
 
   const openAddProduct = () =>
     setProductFormState({ open: true, product: EMPTY_PRODUCT(clubId) });
-
   const openEditProduct = (product: Product) =>
     setProductFormState({ open: true, product });
-
   const closeProductForm = () =>
     setProductFormState({ open: false, product: EMPTY_PRODUCT(clubId) });
 
   return (
     <div className="min-h-screen bg-secondary">
-      {/* Header */}
       <div className="bg-navy py-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <nav
@@ -541,7 +514,6 @@ export default function ClubSetup() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
-        {/* Branding + Preview */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -712,7 +684,6 @@ export default function ClubSetup() {
           </div>
         </motion.div>
 
-        {/* T-Shirt Designer */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -721,7 +692,6 @@ export default function ClubSetup() {
           <TshirtDesigner />
         </motion.div>
 
-        {/* Products */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -736,9 +706,7 @@ export default function ClubSetup() {
               <p className="text-sm text-muted-foreground mt-0.5">
                 {productsLoading
                   ? "Loading..."
-                  : `${products?.length ?? 0} product${
-                      (products?.length ?? 0) !== 1 ? "s" : ""
-                    }`}
+                  : `${products?.length ?? 0} product${(products?.length ?? 0) !== 1 ? "s" : ""}`}
               </p>
             </div>
             <Button

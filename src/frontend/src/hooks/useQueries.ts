@@ -62,18 +62,6 @@ export function useProductById(productId: bigint | undefined) {
   });
 }
 
-export function useIsAdmin() {
-  const { actor, isFetching } = useActor();
-  return useQuery<boolean>({
-    queryKey: ["is-admin"],
-    queryFn: async () => {
-      if (!actor) return false;
-      return actor.isCallerAdmin();
-    },
-    enabled: !!actor && !isFetching,
-  });
-}
-
 export function useCreateClub() {
   const { actor } = useActor();
   const queryClient = useQueryClient();

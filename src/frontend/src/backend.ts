@@ -129,6 +129,23 @@ export enum UserRole {
     user = "user",
     guest = "guest"
 }
+export interface StripeConfiguration {
+    secretKey: string;
+    allowedCountries: string[];
+}
+export interface ShoppingItem {
+    name: string;
+    currency: string;
+    quantity: bigint;
+    amount: bigint;
+}
+export interface Order {
+    id: bigint;
+    itemsJson: string;
+    totalInPence: bigint;
+    status: string;
+    stripeSessionId: string;
+}
 export interface backendInterface {
     _caffeineStorageBlobIsLive(hash: Uint8Array): Promise<boolean>;
     _caffeineStorageBlobsToDelete(): Promise<Array<Uint8Array>>;
@@ -154,6 +171,14 @@ export interface backendInterface {
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     updateClub(club: Club): Promise<void>;
     updateProduct(product: Product): Promise<void>;
+    verifyAdminPassword(username: string, password: string): Promise<boolean>;
+    isStripeConfigured(): Promise<boolean>;
+    setStripeConfiguration(config: StripeConfiguration): Promise<void>;
+    createCheckoutSession(items: ShoppingItem[], successUrl: string, cancelUrl: string): Promise<string>;
+    createOrder(itemsJson: string, totalInPence: bigint, stripeSessionId: string): Promise<bigint>;
+    updateOrderStatus(orderId: bigint, status: string): Promise<void>;
+    getOrderById(orderId: bigint): Promise<Order | null>;
+    getOrderByStripeSession(sessionId: string): Promise<Order | null>;
 }
 import type { Club as _Club, Product as _Product, UserProfile as _UserProfile, UserRole as _UserRole, _CaffeineStorageRefillInformation as __CaffeineStorageRefillInformation, _CaffeineStorageRefillResult as __CaffeineStorageRefillResult } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
@@ -493,6 +518,36 @@ export class Backend implements backendInterface {
             const result = await this.actor.updateProduct(arg0);
             return result;
         }
+    }
+    async verifyAdminPassword(arg0: string, arg1: string): Promise<boolean> {
+        const result = await (this.actor as any).verifyAdminPassword(arg0, arg1);
+        return result;
+    }
+    async isStripeConfigured(): Promise<boolean> {
+        const result = await (this.actor as any).isStripeConfigured();
+        return result;
+    }
+    async setStripeConfiguration(arg0: StripeConfiguration): Promise<void> {
+        await (this.actor as any).setStripeConfiguration(arg0);
+    }
+    async createCheckoutSession(arg0: ShoppingItem[], arg1: string, arg2: string): Promise<string> {
+        const result = await (this.actor as any).createCheckoutSession(arg0, arg1, arg2);
+        return result;
+    }
+    async createOrder(arg0: string, arg1: bigint, arg2: string): Promise<bigint> {
+        const result = await (this.actor as any).createOrder(arg0, arg1, arg2);
+        return result;
+    }
+    async updateOrderStatus(arg0: bigint, arg1: string): Promise<void> {
+        await (this.actor as any).updateOrderStatus(arg0, arg1);
+    }
+    async getOrderById(arg0: bigint): Promise<Order | null> {
+        const result = await (this.actor as any).getOrderById(arg0);
+        return result.length === 0 ? null : result[0];
+    }
+    async getOrderByStripeSession(arg0: string): Promise<Order | null> {
+        const result = await (this.actor as any).getOrderByStripeSession(arg0);
+        return result.length === 0 ? null : result[0];
     }
 }
 function from_candid_UserRole_n11(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _UserRole): UserRole {

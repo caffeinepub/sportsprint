@@ -1,3 +1,4 @@
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -19,9 +20,13 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import {
+  CreditCard,
   Loader2,
+  Lock,
+  LogOut,
   Pencil,
   Plus,
   Settings,
@@ -35,7 +40,8 @@ import { useRef, useState } from "react";
 import { toast } from "sonner";
 import type { Club, Product } from "../backend.d.ts";
 import { formatPrice } from "../components/ProductCard";
-import { useInternetIdentity } from "../hooks/useInternetIdentity";
+import { useActor } from "../hooks/useActor";
+import { useAdminAuth } from "../hooks/useAdminAuth";
 import {
   useAllClubs,
   useCreateClub,
@@ -43,7 +49,6 @@ import {
   useDeleteClub,
   useDeleteProduct,
   useGeneralStock,
-  useIsAdmin,
   useUpdateClub,
   useUpdateProduct,
 } from "../hooks/useQueries";
@@ -497,10 +502,255 @@ function ProductForm({
   );
 }
 
+function LoginForm({
+  onLogin,
+}: { onLogin: (username: string, password: string) => boolean }) {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    const success = onLogin(username, password);
+    setLoading(false);
+    if (!success) {
+      setError("Incorrect username or password. Please try again.");
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-background flex items-center justify-center">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="w-full max-w-sm mx-auto px-4"
+        data-ocid="admin.panel"
+      >
+        <div className="bg-card border border-border rounded-xl p-8 shadow-sm">
+          <div className="flex flex-col items-center mb-8">
+            <div className="w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+              <Lock className="w-7 h-7 text-primary" />
+            </div>
+            <h1 className="font-heading font-black text-2xl uppercase tracking-tight">
+              Admin Login
+            </h1>
+            <p className="text-muted-foreground text-sm mt-1">
+              SportsPrint Admin Area
+            </p>
+          </div>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <Label
+                htmlFor="admin-username"
+                className="text-xs uppercase tracking-widest font-bold"
+              >
+                Username
+              </Label>
+              <Input
+                id="admin-username"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Enter username"
+                autoComplete="username"
+                className="mt-1"
+                data-ocid="admin.username_input"
+              />
+            </div>
+            <div>
+              <Label
+                htmlFor="admin-password"
+                className="text-xs uppercase tracking-widest font-bold"
+              >
+                Password
+              </Label>
+              <Input
+                id="admin-password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter password"
+                autoComplete="current-password"
+                className="mt-1"
+                data-ocid="admin.password_input"
+              />
+            </div>
+            {error && (
+              <p
+                className="text-destructive text-sm"
+                data-ocid="admin.error_state"
+              >
+                {error}
+              </p>
+            )}
+            <Button
+              type="submit"
+              className="w-full font-bold uppercase tracking-widest text-xs"
+              disabled={loading || !username || !password}
+              data-ocid="admin.primary_button"
+            >
+              {loading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                "Log In"
+              )}
+            </Button>
+          </form>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
+function PaymentsTab() {
+  const { actor } = useActor();
+  const [stripeKey, setStripeKey] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const { data: isConfigured, refetch } = useQuery({
+    queryKey: ["stripeConfigured"],
+    queryFn: async () => {
+      if (!actor) return false;
+      try {
+        return await (actor as any).isStripeConfigured();
+      } catch {
+        return false;
+      }
+    },
+    enabled: !!actor,
+  });
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!stripeKey.startsWith("sk_")) {
+      toast.error("Please enter a valid Stripe secret key (starts with sk_)");
+      return;
+    }
+    if (!actor) {
+      toast.error("Actor not available");
+      return;
+    }
+    setSaving(true);
+    try {
+      await (actor as any).setStripeConfiguration({
+        secretKey: stripeKey,
+        allowedCountries: ["GB", "US", "CA", "AU"],
+      });
+      toast.success("Stripe configured successfully");
+      setStripeKey("");
+      refetch();
+    } catch (_err) {
+      toast.error("Failed to save Stripe configuration");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="max-w-2xl">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="font-heading font-bold text-xl uppercase tracking-tight">
+          Payment Settings
+        </h2>
+        {isConfigured && (
+          <Badge className="bg-green-100 text-green-800 border-green-200 text-xs uppercase tracking-widest font-bold">
+            Stripe Configured
+          </Badge>
+        )}
+      </div>
+
+      <div className="bg-card border border-border rounded-lg p-6 mb-6">
+        <div className="flex items-start gap-3 mb-4">
+          <CreditCard className="w-5 h-5 text-primary mt-0.5" />
+          <div>
+            <h3 className="font-heading font-bold text-sm uppercase tracking-widest mb-1">
+              Stripe Integration
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              Connect your Stripe account to accept card payments. Stripe
+              charges a small fee per transaction (typically 1.4% + 30p for UK
+              cards).
+            </p>
+          </div>
+        </div>
+
+        {isConfigured && (
+          <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4 text-sm text-green-800">
+            ✓ Stripe is connected and ready to accept payments.
+          </div>
+        )}
+
+        <form
+          onSubmit={handleSave}
+          className="space-y-4"
+          data-ocid="admin.payments.panel"
+        >
+          <div>
+            <Label
+              htmlFor="stripe-key"
+              className="text-xs uppercase tracking-widest font-bold"
+            >
+              {isConfigured ? "Update Stripe Secret Key" : "Stripe Secret Key"}
+            </Label>
+            <p className="text-xs text-muted-foreground mb-2">
+              Find this in your{" "}
+              <a
+                href="https://dashboard.stripe.com/apikeys"
+                target="_blank"
+                rel="noreferrer"
+                className="text-primary underline"
+              >
+                Stripe Dashboard → API Keys
+              </a>
+              . Use sk_test_... for testing, sk_live_... for production.
+            </p>
+            <Input
+              id="stripe-key"
+              type="password"
+              value={stripeKey}
+              onChange={(e) => setStripeKey(e.target.value)}
+              placeholder="sk_live_... or sk_test_..."
+              data-ocid="admin.payments.input"
+            />
+          </div>
+          <Button
+            type="submit"
+            disabled={saving || !stripeKey}
+            className="font-bold uppercase tracking-widest text-xs"
+            data-ocid="admin.payments.submit_button"
+          >
+            {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+            {saving
+              ? "Saving..."
+              : isConfigured
+                ? "Update Configuration"
+                : "Save Configuration"}
+          </Button>
+        </form>
+      </div>
+
+      <div className="bg-muted/50 border border-border rounded-lg p-4">
+        <h4 className="font-bold text-xs uppercase tracking-widest mb-2">
+          How it works
+        </h4>
+        <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+          <li>Customers add items to their basket and proceed to checkout</li>
+          <li>They are redirected to a secure Stripe payment page</li>
+          <li>
+            After payment, they return to your site with an order confirmation
+          </li>
+          <li>Payments appear in your Stripe dashboard immediately</li>
+        </ul>
+      </div>
+    </div>
+  );
+}
+
 export default function Admin() {
-  const { login, loginStatus, loginError, clear, isInitializing } =
-    useInternetIdentity();
-  const { data: isAdmin, isLoading: adminLoading } = useIsAdmin();
+  const { isAuthenticated, login, logout } = useAdminAuth();
   const { data: clubs, isLoading: clubsLoading } = useAllClubs();
   const { data: products, isLoading: productsLoading } = useGeneralStock();
 
@@ -523,108 +773,8 @@ export default function Admin() {
     product: EMPTY_PRODUCT,
   });
 
-  const isLoggedIn = loginStatus === "success";
-  const isLoggingIn = loginStatus === "logging-in";
-
-  if (isInitializing) {
-    return (
-      <div
-        className="min-h-screen bg-background flex items-center justify-center"
-        data-ocid="admin.loading_state"
-      >
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  if (!isLoggedIn) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center max-w-md mx-auto px-4"
-          data-ocid="admin.panel"
-        >
-          <div className="w-16 h-16 bg-navy rounded-full flex items-center justify-center mx-auto mb-6">
-            <Shield className="w-8 h-8 text-primary" />
-          </div>
-          <h1 className="font-heading font-black text-2xl uppercase tracking-tight mb-3">
-            Admin Area
-          </h1>
-          <p className="text-muted-foreground mb-8">
-            Please log in to access the admin dashboard.
-          </p>
-          <Button
-            size="lg"
-            onClick={() => login()}
-            disabled={isLoggingIn}
-            className="bg-primary hover:bg-primary/90 text-white font-bold uppercase tracking-widest text-xs"
-            data-ocid="admin.primary_button"
-          >
-            {isLoggingIn ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Logging in...
-              </>
-            ) : (
-              "Login to Admin"
-            )}
-          </Button>
-          {loginError && (
-            <p
-              className="text-destructive text-sm mt-3"
-              data-ocid="admin.error_state"
-            >
-              {loginError.message}
-            </p>
-          )}
-          <p className="text-xs text-muted-foreground mt-4">
-            Note: Please allow pop-ups for this site when prompted by your
-            browser.
-          </p>
-        </motion.div>
-      </div>
-    );
-  }
-
-  if (adminLoading) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 py-20">
-        <Skeleton className="h-12 w-64 mb-8" data-ocid="admin.loading_state" />
-        <Skeleton className="h-64 rounded-lg" />
-      </div>
-    );
-  }
-
-  if (!isAdmin) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div
-          className="text-center max-w-md mx-auto px-4"
-          data-ocid="admin.error_state"
-        >
-          <Shield className="w-12 h-12 text-destructive mx-auto mb-4" />
-          <h1 className="font-heading font-black text-2xl uppercase tracking-tight mb-3">
-            Access Denied
-          </h1>
-          <p className="text-muted-foreground mb-2">
-            You do not have admin privileges.
-          </p>
-          <p className="text-sm text-muted-foreground mb-6">
-            If you got here by mistake, make sure you&apos;re using the admin
-            link from your Caffeine dashboard.
-          </p>
-          <Button
-            variant="outline"
-            onClick={() => clear()}
-            data-ocid="admin.secondary_button"
-          >
-            Log out and try again
-          </Button>
-        </div>
-      </div>
-    );
+  if (!isAuthenticated) {
+    return <LoginForm onLogin={login} />;
   }
 
   const handleCreateClub = async (club: Club) => {
@@ -689,14 +839,25 @@ export default function Admin() {
 
   return (
     <div className="min-h-screen bg-secondary">
-      {/* Header */}
       <div className="bg-navy py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-3">
-            <Shield className="w-6 h-6 text-primary" />
-            <h1 className="font-heading font-black text-white text-3xl uppercase tracking-tight">
-              Admin Dashboard
-            </h1>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Shield className="w-6 h-6 text-primary" />
+              <h1 className="font-heading font-black text-white text-3xl uppercase tracking-tight">
+                Admin Dashboard
+              </h1>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={logout}
+              className="text-xs font-bold uppercase tracking-widest text-white border-white/30 hover:bg-white/10"
+              data-ocid="admin.logout_button"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              Log Out
+            </Button>
           </div>
         </div>
       </div>
@@ -717,6 +878,13 @@ export default function Admin() {
               data-ocid="admin.tab"
             >
               Products ({products?.length ?? 0})
+            </TabsTrigger>
+            <TabsTrigger
+              value="payments"
+              className="uppercase tracking-widest text-xs font-bold"
+              data-ocid="admin.tab"
+            >
+              Payments
             </TabsTrigger>
           </TabsList>
 
@@ -850,7 +1018,7 @@ export default function Admin() {
                                   size="sm"
                                   className="text-xs font-bold"
                                 >
-                                  <Settings className="w-3.5 h-3.5 mr-1" />
+                                  <Settings className="w-3.5 h-3.5 mr-1" />{" "}
                                   Setup
                                 </Button>
                               </Link>
@@ -1030,11 +1198,7 @@ export default function Admin() {
                           </TableCell>
                           <TableCell>
                             <span
-                              className={`text-xs font-bold uppercase tracking-wide px-2 py-0.5 rounded-sm ${
-                                product.isActive
-                                  ? "bg-green-100 text-green-700"
-                                  : "bg-muted text-muted-foreground"
-                              }`}
+                              className={`text-xs font-bold uppercase tracking-wide px-2 py-0.5 rounded-sm ${product.isActive ? "bg-green-100 text-green-700" : "bg-muted text-muted-foreground"}`}
                             >
                               {product.isActive ? "Active" : "Hidden"}
                             </span>
@@ -1103,6 +1267,9 @@ export default function Admin() {
                 </Table>
               </div>
             )}
+          </TabsContent>
+          <TabsContent value="payments">
+            <PaymentsTab />
           </TabsContent>
         </Tabs>
       </div>

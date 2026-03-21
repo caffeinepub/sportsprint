@@ -1,12 +1,13 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Link, useParams } from "@tanstack/react-router";
+import { Link, useNavigate, useParams } from "@tanstack/react-router";
 import { ArrowLeft, Check, Ruler, ShoppingCart } from "lucide-react";
 import { motion } from "motion/react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { formatPrice } from "../components/ProductCard";
+import { useCart } from "../context/CartContext";
 import { SAMPLE_PRODUCTS } from "../data/sampleData";
 import { useProductById } from "../hooks/useQueries";
 
@@ -14,6 +15,8 @@ export default function ProductDetail() {
   const { id } = useParams({ from: "/product/$id" });
   const productId = id ? BigInt(id) : undefined;
   const { data: product, isLoading } = useProductById(productId);
+  const { addToCart } = useCart();
+  const navigate = useNavigate();
 
   const displayProduct =
     product ||
@@ -47,9 +50,20 @@ export default function ProductDetail() {
       toast.error("Please select a colour");
       return;
     }
-    toast.success(
-      `Added ${displayProduct.name} (${selectedSize}, ${selectedColor}) to cart!`,
-    );
+    addToCart({
+      productId: displayProduct.id.toString(),
+      productName: displayProduct.name,
+      price: displayProduct.priceInPence,
+      size: selectedSize,
+      color: selectedColor,
+      imageUrl: displayProduct.imageUrl || "",
+    });
+    toast.success(`Added ${displayProduct.name} to your basket!`, {
+      action: {
+        label: "View Basket",
+        onClick: () => navigate({ to: "/basket" }),
+      },
+    });
   };
 
   if (isLoading) {

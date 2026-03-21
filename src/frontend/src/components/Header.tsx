@@ -2,13 +2,11 @@ import { Button } from "@/components/ui/button";
 import { Link } from "@tanstack/react-router";
 import { Menu, ShoppingCart, X, Zap } from "lucide-react";
 import { useState } from "react";
-import { useInternetIdentity } from "../hooks/useInternetIdentity";
+import { useCart } from "../context/CartContext";
 
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { login, clear, loginStatus } = useInternetIdentity();
-  const isLoggedIn = loginStatus === "success";
-  const isLoggingIn = loginStatus === "logging-in";
+  const { cartCount } = useCart();
 
   const navLinks = [
     { to: "/", label: "HOME", exact: true },
@@ -55,35 +53,19 @@ export default function Header() {
 
           {/* Right actions */}
           <div className="flex items-center gap-2">
-            {isLoggedIn ? (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => clear()}
-                className="text-xs uppercase tracking-widest hidden sm:flex"
-                data-ocid="nav.button"
-              >
-                Log Out
-              </Button>
-            ) : (
-              <Button
-                size="sm"
-                onClick={() => login()}
-                disabled={isLoggingIn}
-                className="text-xs uppercase tracking-widest hidden sm:flex"
-                data-ocid="nav.button"
-              >
-                {isLoggingIn ? "Logging in..." : "Login"}
-              </Button>
-            )}
-            <button
-              type="button"
-              className="p-2 text-muted-foreground hover:text-primary transition-colors"
+            <Link
+              to="/basket"
+              className="relative p-2 text-muted-foreground hover:text-primary transition-colors"
               aria-label="Cart"
-              data-ocid="nav.button"
+              data-ocid="nav.link"
             >
               <ShoppingCart className="w-5 h-5" />
-            </button>
+              {cartCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-primary text-white text-[10px] font-bold rounded-full flex items-center justify-center leading-none">
+                  {cartCount > 9 ? "9+" : cartCount}
+                </span>
+              )}
+            </Link>
             <button
               type="button"
               className="md:hidden p-2 text-foreground"
@@ -114,34 +96,6 @@ export default function Header() {
               {link.label}
             </Link>
           ))}
-          <div className="px-4 py-3 border-t border-border">
-            {isLoggedIn ? (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  clear();
-                  setMobileOpen(false);
-                }}
-                className="w-full text-xs uppercase tracking-widest"
-                data-ocid="nav.button"
-              >
-                Log Out
-              </Button>
-            ) : (
-              <Button
-                size="sm"
-                onClick={() => {
-                  login();
-                  setMobileOpen(false);
-                }}
-                className="w-full text-xs uppercase tracking-widest"
-                data-ocid="nav.button"
-              >
-                Login
-              </Button>
-            )}
-          </div>
         </nav>
       )}
     </header>
