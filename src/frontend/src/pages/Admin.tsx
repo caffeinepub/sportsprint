@@ -498,7 +498,7 @@ function ProductForm({
 }
 
 export default function Admin() {
-  const { login, loginStatus, loginError, clear, identity, isInitializing } =
+  const { login, loginStatus, loginError, clear, isInitializing } =
     useInternetIdentity();
   const { data: isAdmin, isLoading: adminLoading } = useIsAdmin();
   const { data: clubs, isLoading: clubsLoading } = useAllClubs();
@@ -523,8 +523,7 @@ export default function Admin() {
     product: EMPTY_PRODUCT,
   });
 
-  const isLoggedIn =
-    loginStatus === "success" || (loginStatus === "idle" && !!identity);
+  const isLoggedIn = loginStatus === "success";
   const isLoggingIn = loginStatus === "logging-in";
 
   if (isInitializing) {
