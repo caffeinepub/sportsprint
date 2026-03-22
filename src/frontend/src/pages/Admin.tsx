@@ -779,7 +779,8 @@ export default function Admin() {
 
   const handleCreateClub = async (club: Club) => {
     try {
-      await createClub.mutateAsync(club);
+      const clubWithId = { ...club, id: BigInt(Date.now()) };
+      await createClub.mutateAsync(clubWithId);
       toast.success("Club created successfully");
       setClubDialog({ open: false, club: EMPTY_CLUB });
     } catch {
@@ -809,7 +810,8 @@ export default function Admin() {
 
   const handleCreateProduct = async (product: Product) => {
     try {
-      await createProduct.mutateAsync(product);
+      const productWithId = { ...product, id: BigInt(Date.now()) };
+      await createProduct.mutateAsync(productWithId);
       toast.success("Product created successfully");
       setProductDialog({ open: false, product: EMPTY_PRODUCT });
     } catch {
