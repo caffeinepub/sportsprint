@@ -11,63 +11,20 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Ruler } from "lucide-react";
 
-const mensSizes = [
-  { size: "XS", chest: "34-36", waist: "28-30", hips: "34-36" },
-  { size: "S", chest: "36-38", waist: "30-32", hips: "36-38" },
-  { size: "M", chest: "38-40", waist: "32-34", hips: "38-40" },
-  { size: "L", chest: "40-42", waist: "34-36", hips: "40-42" },
-  { size: "XL", chest: "42-44", waist: "36-38", hips: "42-44" },
-  { size: "2XL", chest: "44-46", waist: "38-40", hips: "44-46" },
-  { size: "3XL", chest: "46-48", waist: "40-42", hips: "46-48" },
+const topSizes = [
+  { size: "S", chest: "36–38", waist: "30–32", notes: "Standard fit" },
+  { size: "M", chest: "38–40", waist: "32–34", notes: "Standard fit" },
+  { size: "L", chest: "40–42", waist: "34–36", notes: "Standard fit" },
+  { size: "XL", chest: "42–44", waist: "36–38", notes: "Standard fit" },
+  { size: "XXL", chest: "44–46", waist: "38–40", notes: "Standard fit" },
 ];
 
-const womensSizes = [
-  { size: "XS", chest: "31-33", waist: "24-26", hips: "33-35" },
-  { size: "S", chest: "33-35", waist: "26-28", hips: "35-37" },
-  { size: "M", chest: "35-37", waist: "28-30", hips: "37-39" },
-  { size: "L", chest: "37-39", waist: "30-32", hips: "39-41" },
-  { size: "XL", chest: "39-41", waist: "32-34", hips: "41-43" },
-  { size: "2XL", chest: "41-43", waist: "34-36", hips: "43-45" },
-  { size: "3XL", chest: "43-45", waist: "36-38", hips: "45-47" },
-];
-
-function SizeTable({ data }: { data: typeof mensSizes }) {
-  return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead className="font-bold text-foreground">Size</TableHead>
-          <TableHead>Chest (inches)</TableHead>
-          <TableHead>Waist (inches)</TableHead>
-          <TableHead>Hips (inches)</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {data.map((row) => (
-          <TableRow key={row.size}>
-            <TableCell>
-              <Badge variant="outline" className="font-bold">
-                {row.size}
-              </Badge>
-            </TableCell>
-            <TableCell>{row.chest}</TableCell>
-            <TableCell>{row.waist}</TableCell>
-            <TableCell>{row.hips}</TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
-  );
-}
-
-const garments = [
-  {
-    name: "Performance Jersey",
-    note: "Athletic fit — size up if between sizes",
-  },
-  { name: "Training Shorts", note: "Relaxed fit — true to size" },
-  { name: "Club Jacket", note: "Regular fit — size up for layering" },
-  { name: "Polo Shirt", note: "Slim fit — size up for comfort" },
+const bottomSizes = [
+  { size: "S", waist: "28–30", hips: "36–38", notes: "Standard fit" },
+  { size: "M", waist: "30–32", hips: "38–40", notes: "Standard fit" },
+  { size: "L", waist: "32–34", hips: "40–42", notes: "Standard fit" },
+  { size: "XL", waist: "34–36", hips: "42–44", notes: "Standard fit" },
+  { size: "XXL", waist: "36–38", hips: "44–46", notes: "Standard fit" },
 ];
 
 export default function SizeGuide() {
@@ -87,7 +44,7 @@ export default function SizeGuide() {
           </h1>
           <p className="text-lg text-white/70 max-w-2xl">
             Find your perfect fit across our full range of sports and club
-            garments. All measurements are in inches unless stated otherwise.
+            garments. All measurements are in inches (UK sizing).
           </p>
         </div>
       </section>
@@ -132,28 +89,82 @@ export default function SizeGuide() {
       <section className="py-12 px-4">
         <div className="max-w-4xl mx-auto">
           <h2 className="font-heading text-2xl font-bold mb-6 uppercase tracking-wide">
-            Size Charts
+            Size Charts (UK)
           </h2>
-          <Tabs defaultValue="mens">
+          <Tabs defaultValue="tops">
             <TabsList className="mb-6">
-              <TabsTrigger value="mens" data-ocid="size_guide.tab">
-                Men's
+              <TabsTrigger value="tops" data-ocid="size_guide.tab">
+                T-Shirt / Hoodie / Sweatshirt
               </TabsTrigger>
-              <TabsTrigger value="womens" data-ocid="size_guide.tab">
-                Women's
+              <TabsTrigger value="bottoms" data-ocid="size_guide.tab">
+                Shorts / Joggers
               </TabsTrigger>
             </TabsList>
-            <TabsContent value="mens">
+            <TabsContent value="tops">
               <Card>
                 <CardContent className="pt-6">
-                  <SizeTable data={mensSizes} />
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="font-bold text-foreground">
+                          Size
+                        </TableHead>
+                        <TableHead>Chest (inches)</TableHead>
+                        <TableHead>Waist (inches)</TableHead>
+                        <TableHead>Notes</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {topSizes.map((row) => (
+                        <TableRow key={row.size}>
+                          <TableCell>
+                            <Badge variant="outline" className="font-bold">
+                              {row.size}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>{row.chest}</TableCell>
+                          <TableCell>{row.waist}</TableCell>
+                          <TableCell className="text-muted-foreground">
+                            {row.notes}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
                 </CardContent>
               </Card>
             </TabsContent>
-            <TabsContent value="womens">
+            <TabsContent value="bottoms">
               <Card>
                 <CardContent className="pt-6">
-                  <SizeTable data={womensSizes} />
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="font-bold text-foreground">
+                          Size
+                        </TableHead>
+                        <TableHead>Waist (inches)</TableHead>
+                        <TableHead>Hips (inches)</TableHead>
+                        <TableHead>Notes</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {bottomSizes.map((row) => (
+                        <TableRow key={row.size}>
+                          <TableCell>
+                            <Badge variant="outline" className="font-bold">
+                              {row.size}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>{row.waist}</TableCell>
+                          <TableCell>{row.hips}</TableCell>
+                          <TableCell className="text-muted-foreground">
+                            {row.notes}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
                 </CardContent>
               </Card>
             </TabsContent>
@@ -161,24 +172,27 @@ export default function SizeGuide() {
         </div>
       </section>
 
-      {/* Per-Garment Fit Notes */}
+      {/* Contact */}
       <section className="py-12 px-4 bg-muted/40">
         <div className="max-w-4xl mx-auto">
-          <h2 className="font-heading text-2xl font-bold mb-6 uppercase tracking-wide">
-            Fit Notes by Garment
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {garments.map((g) => (
-              <Card key={g.name}>
-                <CardHeader className="pb-1">
-                  <CardTitle className="text-base">{g.name}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">{g.note}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          <Card>
+            <CardContent className="pt-6">
+              <p className="text-sm text-muted-foreground">
+                Not sure about your size? Contact us at{" "}
+                <a
+                  href="mailto:JTtreasures@gmail.com"
+                  className="text-primary underline"
+                >
+                  JTtreasures@gmail.com
+                </a>{" "}
+                or call{" "}
+                <a href="tel:07568195033" className="text-primary underline">
+                  07568 195033
+                </a>{" "}
+                and we'll be happy to help.
+              </p>
+            </CardContent>
+          </Card>
         </div>
       </section>
     </div>

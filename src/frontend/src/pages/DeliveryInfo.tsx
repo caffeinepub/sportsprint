@@ -7,38 +7,38 @@ const deliveryOptions = [
   {
     icon: Truck,
     title: "Standard Delivery",
-    time: "5–7 working days",
-    price: "Free over £75",
-    priceDetail: "£3.99 under £75",
+    time: "3–7 working days",
+    price: "£4.99",
+    priceDetail: "Free on orders over £50",
     color: "text-primary",
-    desc: "Our most popular delivery option. Orders placed before 2pm are dispatched the same day.",
+    desc: "Orders are processed within 2 working days. Standard delivery via the most reliable and cost-effective shipping service available.",
   },
   {
     icon: Clock,
     title: "Express Delivery",
-    time: "2–3 working days",
+    time: "Faster delivery",
     price: "£9.99",
     priceDetail: "Any order size",
     color: "text-amber-500",
-    desc: "Need it faster? Express delivery is available for all in-stock items. Order before 12pm for same-day dispatch.",
+    desc: "Need it sooner? Express delivery is available for all in-stock items. Contact us to arrange express dispatch.",
   },
   {
     icon: Package,
     title: "Custom / Printed Orders",
     time: "3–4 weeks",
-    price: "Free",
-    priceDetail: "Included in price",
+    price: "Included",
+    priceDetail: "In the order price",
     color: "text-blue-500",
-    desc: "All custom printed club gear requires a production window of 3–4 weeks before dispatch. We'll keep you updated throughout.",
+    desc: "All custom printed club gear requires a production window before dispatch. We'll keep you updated throughout the process.",
   },
 ];
 
 const trackingSteps = [
-  "Order confirmation email sent immediately",
-  "Dispatch confirmation with tracking number (stock items)",
-  "In-production update for custom orders at 1 week and 2 weeks",
-  "Shipped notification with courier tracking link",
-  "Delivered confirmation",
+  "Order confirmation shown on screen after payment",
+  "Orders processed within 2 working days of purchase",
+  "Standard delivery: 3–7 working days depending on location",
+  "We deliver within the United Kingdom only",
+  "Free delivery on all orders over £50",
 ];
 
 const additionalInfo = [
@@ -55,8 +55,8 @@ const additionalInfo = [
     body: "Bulk orders over 50 items may be shipped on a pallet. We'll contact you to arrange delivery.",
   },
   {
-    title: "International",
-    body: "We currently ship within the UK only. International delivery is coming soon — contact us to be notified.",
+    title: "Delivery Region",
+    body: "We currently ship within the United Kingdom only. Contact us at JTtreasures@gmail.com for any queries.",
   },
 ];
 
@@ -114,11 +114,11 @@ export default function DeliveryInfo() {
         </div>
       </section>
 
-      {/* Order Tracking */}
+      {/* Order Info */}
       <section className="py-12 px-4 bg-muted/40">
         <div className="max-w-4xl mx-auto">
           <h2 className="font-heading text-2xl font-bold mb-6 uppercase tracking-wide">
-            Order Tracking
+            Order & Dispatch
           </h2>
           <Card>
             <CardContent className="pt-6">
@@ -133,18 +133,18 @@ export default function DeliveryInfo() {
               <div className="mt-6 p-4 bg-primary/5 rounded-lg border border-primary/20">
                 <p className="text-sm text-muted-foreground">
                   <strong className="text-foreground">
-                    Need help tracking an order?
+                    Need help with an order?
                   </strong>{" "}
-                  Contact our team at{" "}
+                  Contact us at{" "}
                   <a
-                    href="mailto:hello@sportsprint.co.uk"
+                    href="mailto:JTtreasures@gmail.com"
                     className="text-primary underline"
                   >
-                    hello@sportsprint.co.uk
+                    JTtreasures@gmail.com
                   </a>{" "}
                   or call{" "}
-                  <a href="tel:08001234567" className="text-primary underline">
-                    0800 123 4567
+                  <a href="tel:07568195033" className="text-primary underline">
+                    07568 195033
                   </a>
                   .
                 </p>

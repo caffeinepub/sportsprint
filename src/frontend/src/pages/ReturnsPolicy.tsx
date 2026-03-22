@@ -8,22 +8,22 @@ const steps = [
   {
     step: "01",
     title: "Contact Us",
-    desc: "Email hello@sportsprint.co.uk within 30 days of delivery with your order number and reason for return.",
+    desc: "Email JTtreasures@gmail.com within 30 days of delivery to request a return. Include your order number and reason for return.",
   },
   {
     step: "02",
-    title: "Receive Return Label",
-    desc: "We'll email a prepaid return label for faulty items. For change-of-mind returns, return postage is at your cost.",
+    title: "Pack Your Item",
+    desc: "Ensure items are unworn, unwashed, with original tags and packaging intact. Pack securely before posting.",
   },
   {
     step: "03",
-    title: "Pack & Post",
-    desc: "Pack items securely in their original packaging where possible. Drop off at any Royal Mail location.",
+    title: "Post the Return",
+    desc: "Return postage is the customer's responsibility unless the item is faulty, in which case we'll arrange collection.",
   },
   {
     step: "04",
     title: "Refund Processed",
-    desc: "Once we receive and inspect your return, we'll process your refund within 5–7 working days.",
+    desc: "Once received and inspected, refunds are issued to the original payment method within 5 working days. Exchanges can be arranged subject to stock availability.",
   },
 ];
 
@@ -69,8 +69,8 @@ export default function ReturnsPolicy() {
               <CardContent>
                 <ul className="space-y-2 text-sm text-muted-foreground">
                   <li>• 30-day return window from delivery date</li>
-                  <li>• Items must be unworn and in original condition</li>
-                  <li>• Tags must still be attached</li>
+                  <li>• Items must be unworn, unwashed, with original tags</li>
+                  <li>• Original packaging must be intact</li>
                   <li>• Full refund or exchange available</li>
                 </ul>
               </CardContent>
@@ -149,7 +149,7 @@ export default function ReturnsPolicy() {
               <div className="flex items-start gap-3">
                 <ArrowLeft className="w-4 h-4 text-primary mt-1 shrink-0 rotate-180" />
                 <p className="text-sm">
-                  Prepaid return label provided for all faulty items.
+                  Return postage arranged at our cost for all faulty items.
                 </p>
               </div>
               <div className="flex items-start gap-3">
@@ -163,10 +163,14 @@ export default function ReturnsPolicy() {
               <p className="text-sm text-muted-foreground">
                 Questions? Reach us at{" "}
                 <a
-                  href="mailto:hello@sportsprint.co.uk"
+                  href="mailto:JTtreasures@gmail.com"
                   className="text-primary underline"
                 >
-                  hello@sportsprint.co.uk
+                  JTtreasures@gmail.com
+                </a>{" "}
+                or call{" "}
+                <a href="tel:07568195033" className="text-primary underline">
+                  07568 195033
                 </a>
               </p>
             </CardContent>

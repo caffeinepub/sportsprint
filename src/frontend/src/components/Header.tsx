@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import { Link } from "@tanstack/react-router";
 import { Menu, ShoppingCart, X } from "lucide-react";
 import { useState } from "react";
@@ -18,18 +17,26 @@ export default function Header() {
   return (
     <header className="bg-white border-b border-border sticky top-0 z-50 shadow-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
+        <div className="flex items-center justify-between h-24">
+          {/* Logo + Slogan */}
           <Link
             to="/"
-            className="flex items-center gap-2 group"
+            className="flex items-center gap-3 group"
             data-ocid="nav.link"
           >
             <img
               src="/assets/generated/clubkit-logo-transparent.dim_400x400.png"
               alt="Clubkit Co"
-              className="h-10 w-auto"
+              className="h-20 w-auto"
             />
+            <div className="flex flex-col leading-tight hidden sm:flex">
+              <span className="text-xl font-black tracking-wide text-foreground uppercase">
+                Clubkit Co
+              </span>
+              <span className="text-xs font-semibold tracking-widest text-amber-600 uppercase">
+                Gear Up. Game On.
+              </span>
+            </div>
           </Link>
 
           {/* Desktop nav */}

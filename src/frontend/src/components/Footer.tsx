@@ -146,9 +146,30 @@ export default function Footer() {
               Contact
             </h4>
             <ul className="space-y-3 text-sm text-white/60">
-              <li>hello@clubkitco.co.uk</li>
-              <li>0800 123 4567</li>
-              <li className="text-white/40">Mon–Fri, 9am–5pm</li>
+              <li>
+                <a
+                  href="mailto:JTtreasures@gmail.com"
+                  className="hover:text-primary transition-colors"
+                >
+                  JTtreasures@gmail.com
+                </a>
+              </li>
+              <li>
+                <a
+                  href="tel:07568195033"
+                  className="hover:text-primary transition-colors"
+                >
+                  07568 195033
+                </a>
+              </li>
+              <li>Crossley Avenue, Wigan, WN3 6GR, UK</li>
+              <li className="text-white/40 text-xs leading-relaxed">
+                Mon–Fri: 08:00–17:00
+                <br />
+                Saturday: 08:00–12:00
+                <br />
+                Sunday: Closed
+              </li>
             </ul>
           </div>
         </div>
