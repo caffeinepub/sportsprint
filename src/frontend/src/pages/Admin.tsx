@@ -54,7 +54,7 @@ import {
 } from "../hooks/useQueries";
 
 const EMPTY_CLUB: Club = {
-  id: 0n,
+  id: -1n,
   name: "",
   slug: "",
   description: "",
@@ -298,7 +298,7 @@ function ClubForm({
           data-ocid="admin.club.submit_button"
         >
           {isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-          {initial.id === 0n ? "Create Club" : "Update Club"}
+          {initial.id === -1n ? "Create Club" : "Update Club"}
         </Button>
       </div>
     </form>
@@ -895,7 +895,7 @@ export default function Admin() {
                 Manage Clubs
               </h2>
               <Dialog
-                open={clubDialog.open && clubDialog.club.id === 0n}
+                open={clubDialog.open && clubDialog.club.id === -1n}
                 onOpenChange={(open) =>
                   setClubDialog({ open, club: EMPTY_CLUB })
                 }
